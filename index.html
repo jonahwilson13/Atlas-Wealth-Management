@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1014,6 +1015,7 @@
               <th>Client</th>
               <th>Risk Profile</th>
               <th>Holdings</th>
+              <th>Last Contacted</th>
               <th>Last Report</th>
               <th>Actions</th>
             </tr>
@@ -1243,6 +1245,46 @@
   </div>
 </div>
 
+<!-- DRAFT EMAIL MODAL -->
+<div class="modal-overlay" id="draftModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="draftModalTitle">Draft Outreach Email</div>
+      <button class="modal-close" onclick="closeModal('draftModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="draftLoadingState" style="text-align:center;padding:32px 0">
+        <div style="display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:14px"></div>
+        <div style="font-size:14px;color:var(--text-muted)" id="draftLoadingLabel">Drafting your email…</div>
+      </div>
+      <div id="draftReadyState" style="display:none">
+        <div class="form-group">
+          <label class="form-label">To</label>
+          <input class="form-input" id="draftTo" readonly style="background:var(--off-white)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input class="form-input" id="draftSubject">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body</label>
+          <textarea class="form-textarea" id="draftBody" style="min-height:260px;font-size:14px;line-height:1.7"></textarea>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:-8px">
+          Edit freely before sending. Click <strong>Mark as Contacted</strong> after you send to update the outreach tracker.
+        </div>
+      </div>
+      <div id="draftErrorState" style="display:none;background:#fee2e2;border-radius:8px;padding:16px;color:#991b1b;font-size:13px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('draftModal')">Cancel</button>
+      <button class="btn btn-ghost" id="draftCopyBtn" onclick="copyDraft()" style="display:none">📋 Copy</button>
+      <button class="btn btn-ghost" id="draftMailtoBtn" onclick="openMailto()" style="display:none">📤 Open in Mail</button>
+      <button class="btn btn-primary" id="draftMarkBtn" onclick="markContacted()" style="display:none">✅ Mark as Contacted</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1298,6 +1340,7 @@ function load() {
         { ticker: 'KLAC',  shares: '20',  assetClass: 'Equity' },
       ],
       lastReport: null,
+      lastContacted: null,
       addedDate: new Date().toISOString()
     }];
     state.reportHistory = state.reportHistory || [];
@@ -1399,11 +1442,34 @@ function showPage(page) {
 //  DASHBOARD
 // ═══════════════════════════════════════════════════════════
 
+function contactColor(lastContacted) {
+  // Gradates green → amber → red over 14 days. Never contacted = full red.
+  if (!lastContacted) return { color: '#dc2626', bg: '#fee2e2', label: 'Never' };
+  const days = (new Date() - new Date(lastContacted)) / 86400000;
+  const t    = Math.min(days / 14, 1); // 0 = just now, 1 = 14+ days
+  // Interpolate: green(22,163,74) → amber(217,119,6) at t=0.5 → red(220,38,38) at t=1
+  let r, g, b;
+  if (t < 0.5) {
+    const u = t * 2;
+    r = Math.round(22  + (217 - 22)  * u);
+    g = Math.round(163 + (119 - 163) * u);
+    b = Math.round(74  + (6   - 74)  * u);
+  } else {
+    const u = (t - 0.5) * 2;
+    r = Math.round(217 + (220 - 217) * u);
+    g = Math.round(119 + (38  - 119) * u);
+    b = Math.round(6   + (38  - 6)   * u);
+  }
+  const hex   = '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  const dLabel = days < 1 ? 'Today' : days < 2 ? 'Yesterday' : `${Math.floor(days)}d ago`;
+  return { color: hex, bg: hex + '18', label: dLabel };
+}
+
 function renderDashboard() {
   const now = new Date();
   const needsContact = state.clients.filter(c => {
-    if (!c.lastReport) return true;
-    return (now - new Date(c.lastReport)) / 86400000 > 7;
+    if (!c.lastContacted) return true;
+    return (now - new Date(c.lastContacted)) / 86400000 > 14;
   }).length;
 
   document.getElementById('statsRow').innerHTML = `
@@ -1422,7 +1488,7 @@ function renderDashboard() {
       <div class="stat-card-value" style="color:${needsContact > 0 ? 'var(--red)' : 'var(--green)'}">
         ${needsContact}
       </div>
-      <div class="stat-card-sub">No report in 7+ days</div>
+      <div class="stat-card-sub">No contact in 14+ days</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-label">Total Positions</div>
@@ -1433,7 +1499,7 @@ function renderDashboard() {
 
   const tbody = document.getElementById('dashboardTableBody');
   if (state.clients.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
       <div class="empty-state-icon">👥</div>
       <h3>No clients yet</h3>
       <p>Add your first client to get started.</p>
@@ -1449,14 +1515,23 @@ function renderDashboard() {
       ? `<span class="badge ${daysSince > 7 ? 'badge-pending' : 'badge-sent'}">${lastRpt}</span>`
       : `<span class="badge badge-never">Never</span>`;
 
+    const cc = contactColor(c.lastContacted);
+    const contactedCell = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cc.color};flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:600;color:${cc.color}">${cc.label}</span>
+      </div>`;
+
     return `<tr>
       <td class="client-name-cell" style="cursor:pointer" onclick="showClientDetail('${c.id}')">${c.name}</td>
       <td><span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span></td>
       <td style="font-size:12px">${(c.holdings||[]).map(h=>`<strong>${h.ticker}</strong>`).join(', ') || '—'}</td>
+      <td>${contactedCell}</td>
       <td>${rptBadge}</td>
       <td>
         <div class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="showClientDetail('${c.id}')">View</button>
+          <button class="btn btn-gold btn-sm" onclick="openDraftModal('${c.id}')">✉ Draft</button>
           <button class="btn btn-primary btn-sm" onclick="openGenerateSingle('${c.id}')">📊 Report</button>
           <button class="btn btn-ghost btn-sm" onclick="openEditClient('${c.id}')">Edit</button>
         </div>
@@ -1544,7 +1619,8 @@ function showClientDetail(id) {
       </div>
       <div style="display:flex;gap:9px">
         <button class="btn btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="openEditClient('${c.id}')">✏️ Edit</button>
-        <button class="btn btn-gold" onclick="openGenerateSingle('${c.id}')">📊 Generate Report</button>
+        <button class="btn btn-gold" onclick="openDraftModal('${c.id}')">✉ Draft Email</button>
+        <button class="btn btn-primary" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25)" onclick="openGenerateSingle('${c.id}')">📊 Report</button>
       </div>
     </div>
 
@@ -1565,6 +1641,10 @@ function showClientDetail(id) {
           <div>
             <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Risk Profile</span>
             <span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span>
+          </div>
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Last Contacted</span>
+            ${(() => { const cc = contactColor(c.lastContacted); return `<span style="font-size:14px;font-weight:600;color:${cc.color}">${c.lastContacted ? new Date(c.lastContacted).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + ' (' + cc.label + ')' : 'Never'}</span>`; })()}
           </div>
           <div>
             <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Last Report</span>
@@ -1673,7 +1753,7 @@ function saveClient() {
     const c = state.clients.find(x => x.id === editId);
     if (c) Object.assign(c, { name, email, risk, account, notes, holdings });
   } else {
-    state.clients.push({ id:'C'+Date.now(), name, email, risk, account, notes, holdings, lastReport:null, addedDate:new Date().toISOString() });
+    state.clients.push({ id:'C'+Date.now(), name, email, risk, account, notes, holdings, lastReport:null, lastContacted:null, addedDate:new Date().toISOString() });
   }
 
   save();
@@ -1690,6 +1770,141 @@ function deleteClient(id) {
   showToast('Client deleted', 'info');
   renderClientsTable();
   renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAFT EMAIL
+// ═══════════════════════════════════════════════════════════
+
+let draftClientId = null;
+
+async function openDraftModal(clientId) {
+  const c = state.clients.find(x => x.id === clientId);
+  if (!c) return;
+
+  draftClientId = clientId;
+  document.getElementById('draftModalTitle').textContent = `Draft Email — ${c.name}`;
+
+  // Reset state
+  document.getElementById('draftLoadingState').style.display = 'block';
+  document.getElementById('draftReadyState').style.display   = 'none';
+  document.getElementById('draftErrorState').style.display   = 'none';
+  ['draftCopyBtn','draftMailtoBtn','draftMarkBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+
+  openModal('draftModal');
+
+  if (!state.settings.apiKey) {
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftErrorState').style.display   = 'block';
+    document.getElementById('draftErrorState').textContent     = '⚠️ No Anthropic API key configured. Add it in Settings to use AI drafting.';
+    return;
+  }
+
+  // Build context about this client
+  const holdingsSummary = (c.holdings || []).map(h => `${h.ticker} (${h.shares} shares, ${h.assetClass})`).join(', ') || 'no holdings on file';
+  const lastReportDate  = c.lastReport ? new Date(c.lastReport).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'never';
+  const daysSinceContact = c.lastContacted ? Math.floor((new Date() - new Date(c.lastContacted)) / 86400000) : null;
+  const contactContext  = daysSinceContact === null ? "This client has never been contacted." : `Last contact was ${daysSinceContact} day${daysSinceContact===1?'':'s'} ago.`;
+
+  // Check if there's a recent report to reference
+  const recentReportId  = state.reportHistory.filter(r => r.clientId === clientId)[0]?.id;
+  const hasRecentReport = !!recentReportId;
+
+  const advisorName = state.settings.adviserName || sessionStorage.getItem('atlas_session') || 'Your Advisor';
+  const firmName    = state.settings.firmName || 'Atlas Wealth Management';
+
+  const labels = ['Personalizing tone…', 'Reviewing portfolio context…', 'Drafting your email…'];
+  let li = 0;
+  const labelInterval = setInterval(() => {
+    if (li < labels.length - 1) document.getElementById('draftLoadingLabel').textContent = labels[++li];
+  }, 900);
+
+  try {
+    const prompt = `You are ${advisorName}, a financial advisor at ${firmName}.
+Write a warm, professional, brief outreach email to a client. It should feel personal and human — not generic or template-like.
+
+CLIENT CONTEXT
+  Name: ${c.name}
+  Email: ${c.email}
+  Risk profile: ${c.risk}
+  Holdings: ${holdingsSummary}
+  Notes: ${c.notes || 'None'}
+  Last report sent: ${lastReportDate}
+  ${contactContext}
+  ${hasRecentReport ? 'A portfolio report was recently generated — you can reference their recent performance.' : ''}
+
+Write a short, genuine check-in email (3-4 short paragraphs max). The subject line should be natural, not salesy.
+Mention something specific about their portfolio or situation based on the context above.
+Close warmly with an invitation to connect.
+
+Return ONLY a JSON object with exactly these two keys, no markdown:
+{
+  "subject": "Email subject line here",
+  "body": "Full email body here, use \\n for line breaks"
+}`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    clearInterval(labelInterval);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw  = (data.content || []).map(b => b.text || '').join('').trim()
+                   .replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+    const parsed = JSON.parse(raw);
+
+    document.getElementById('draftTo').value      = c.email;
+    document.getElementById('draftSubject').value = parsed.subject || '';
+    document.getElementById('draftBody').value    = parsed.body || '';
+
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftReadyState').style.display   = 'block';
+    ['draftCopyBtn','draftMailtoBtn','draftMarkBtn'].forEach(id => document.getElementById(id).style.display = 'inline-flex');
+
+  } catch(err) {
+    clearInterval(labelInterval);
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftErrorState').style.display   = 'block';
+    document.getElementById('draftErrorState').textContent     = '❌ Failed to draft email: ' + (err.message || 'Unknown error');
+  }
+}
+
+function copyDraft() {
+  const subject = document.getElementById('draftSubject').value;
+  const body    = document.getElementById('draftBody').value;
+  navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`)
+    .then(() => showToast('Email copied to clipboard', 'success'));
+}
+
+function openMailto() {
+  const to      = document.getElementById('draftTo').value;
+  const subject = encodeURIComponent(document.getElementById('draftSubject').value);
+  const body    = encodeURIComponent(document.getElementById('draftBody').value);
+  window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_blank');
+}
+
+function markContacted(closeAfter = true) {
+  if (!draftClientId) return;
+  const c = state.clients.find(x => x.id === draftClientId);
+  if (!c) return;
+  c.lastContacted = new Date().toISOString();
+  save();
+  showToast(`${c.name} marked as contacted`, 'success');
+  if (closeAfter) closeModal('draftModal');
+  renderDashboard();
+  renderClientsTable();
 }
 
 // ═══════════════════════════════════════════════════════════
