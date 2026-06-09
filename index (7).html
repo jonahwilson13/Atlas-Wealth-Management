@@ -1,0 +1,3169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas — Wealth Management Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:        #0f2744;
+      --navy-mid:    #1a3a5c;
+      --navy-light:  #24517a;
+      --blue:        #1e6abf;
+      --blue-light:  #3b8fe8;
+      --gold:        #c9a84c;
+      --gold-light:  #e8c96a;
+      --white:       #ffffff;
+      --off-white:   #f4f7fb;
+      --border:      #dce6f0;
+      --text:        #1a2e45;
+      --text-muted:  #6b87a8;
+      --green:       #16a34a;
+      --red:         #dc2626;
+      --amber:       #d97706;
+      --sidebar-w:   260px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── LOGIN SCREEN ──────────────────────────────────── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      background: var(--navy);
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    #loginScreen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.02);
+    }
+
+    .login-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 60%, rgba(30,106,191,0.25) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.12) 0%, transparent 50%);
+    }
+
+    .login-left-content { position: relative; z-index: 1; }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 64px;
+    }
+
+    .login-logo-icon {
+      width: 44px; height: 44px;
+      background: var(--gold);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--navy);
+    }
+
+    .login-logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 2px;
+    }
+
+    .login-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .login-tagline em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .login-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      max-width: 380px;
+    }
+
+    .login-decoration {
+      position: absolute;
+      right: -60px; bottom: -60px;
+      width: 400px; height: 400px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .login-decoration::before {
+      content: '';
+      position: absolute;
+      inset: 40px;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+
+    .login-decoration::after {
+      content: '';
+      position: absolute;
+      inset: 80px;
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 50%;
+    }
+
+    .login-right {
+      width: 480px;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px 56px;
+    }
+
+    .login-form-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .login-form-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .login-input-group { margin-bottom: 20px; }
+
+    .login-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .login-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(30,106,191,0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .15s, transform .1s;
+      letter-spacing: .3px;
+    }
+
+    .login-btn:hover { background: var(--navy-mid); }
+    .login-btn:active { transform: scale(0.99); }
+
+    .login-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .login-footer {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── APP SHELL ─────────────────────────────────────── */
+    #appShell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ───────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .logo-mark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--gold);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--navy); font-weight: 800;
+    }
+
+    .logo-sub {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-top: 4px;
+      padding-left: 40px;
+    }
+
+    .sidebar-nav {
+      padding: 20px 14px;
+      flex: 1;
+    }
+
+    .nav-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      padding: 0 10px;
+      margin-bottom: 6px;
+      margin-top: 18px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all .18s;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: var(--blue); color: var(--white); }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-advisor {
+      padding: 18px 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .advisor-avatar {
+      width: 34px; height: 34px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      flex-shrink: 0;
+    }
+
+    .advisor-info { flex: 1; min-width: 0; }
+    .advisor-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .advisor-role {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: .5px;
+    }
+
+    .sidebar-logout {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.25);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color .15s;
+    }
+    .sidebar-logout:hover { color: rgba(255,255,255,0.6); }
+
+    /* ── MAIN ──────────────────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 36px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .topbar-clock {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .3px;
+      margin-right: 8px;
+    }
+
+    /* ── BUTTONS ───────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s;
+    }
+
+    .btn-primary  { background: var(--blue); color: #fff; }
+    .btn-primary:hover  { background: var(--blue-light); }
+    .btn-ghost    { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover    { background: var(--off-white); color: var(--text); }
+    .btn-danger   { background: #fee2e2; color: var(--red); }
+    .btn-danger:hover   { background: #fecaca; }
+    .btn-gold     { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover     { background: var(--gold-light); }
+    .btn-navy     { background: var(--navy); color: #fff; }
+    .btn-navy:hover     { background: var(--navy-mid); }
+    .btn-sm       { padding: 5px 11px; font-size: 12px; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .content { padding: 32px 36px; flex: 1; }
+
+    /* ── PAGES ─────────────────────────────────────────── */
+    .page { display: none; animation: fadeIn .2s ease; }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STAT CARDS ────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 22px;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-card-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .stat-card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .stat-card.highlight { background: var(--navy); border-color: var(--navy); }
+    .stat-card.highlight .stat-card-label { color: rgba(255,255,255,0.35); }
+    .stat-card.highlight .stat-card-value { color: var(--gold); }
+    .stat-card.highlight .stat-card-sub   { color: rgba(255,255,255,0.35); }
+
+    /* ── TABLES ────────────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      background: var(--navy);
+      color: rgba(255,255,255,0.55);
+      font-size: 9.5px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 12px 18px;
+      text-align: left;
+    }
+
+    td {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* ── BADGES ────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-aggressive   { background: #fee2e2; color: #991b1b; }
+    .badge-moderate     { background: #fef3c7; color: #92400e; }
+    .badge-conservative { background: #dcfce7; color: #14532d; }
+    .badge-sent         { background: #dbeafe; color: #1e40af; }
+    .badge-pending      { background: #fef3c7; color: #92400e; }
+    .badge-never        { background: #f1f5f9; color: #64748b; }
+    .badge-generating   { background: #ede9fe; color: #6d28d9; }
+
+    .client-name-cell { font-weight: 600; color: var(--navy); }
+    .action-btns      { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    /* ── MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,39,68,0.55);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      width: 580px;
+      max-width: 96vw;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(15,39,68,0.28);
+    }
+
+    .modal-lg { width: 720px; }
+    .modal-xl { width: 900px; }
+
+    .modal-header {
+      padding: 26px 30px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0;
+      background: var(--white);
+      z-index: 1;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .modal-close {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .modal-close:hover { background: var(--off-white); }
+
+    .modal-body   { padding: 22px 30px; }
+    .modal-footer { padding: 18px 30px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── FORMS ─────────────────────────────────────────── */
+    .form-group { margin-bottom: 16px; }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .15s;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--blue); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.5; }
+
+    /* ── HOLDINGS IN MODAL ─────────────────────────────── */
+    .holdings-list { margin-top: 6px; }
+
+    .holding-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .holding-remove {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      background: #fee2e2;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .add-holding-btn {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--blue);
+      background: none;
+      border: 1.5px dashed var(--blue-light);
+      border-radius: 8px;
+      padding: 7px 13px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      margin-top: 4px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .add-holding-btn:hover { background: #eff6ff; }
+
+    /* ── CLIENT DETAIL ─────────────────────────────────── */
+    .detail-header {
+      background: var(--navy);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .detail-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .detail-email { color: rgba(255,255,255,0.45); font-size: 13px; margin-top: 4px; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .detail-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 22px;
+    }
+
+    .detail-card-title {
+      font-size: 9.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .notes-area {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      min-height: 90px;
+      resize: vertical;
+      outline: none;
+    }
+    .notes-area:focus { border-color: var(--blue); }
+
+    .holding-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--off-white);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 12px;
+      margin: 0 5px 5px 0;
+      font-size: 12px;
+    }
+
+    .holding-tag strong { color: var(--navy); font-weight: 700; }
+    .holding-tag span   { color: var(--text-muted); }
+
+    /* ── REPORT HISTORY ────────────────────────────────── */
+    .report-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    .report-item:last-child { border-bottom: none; }
+    .report-item:hover { background: #f8fafc; }
+    .report-date { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .report-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .report-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* ── SETTINGS ──────────────────────────────────────── */
+    .settings-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 26px 30px;
+      margin-bottom: 18px;
+    }
+
+    .settings-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── EMPTY STATE ───────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state-icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--navy); margin-bottom: 7px; }
+    .empty-state p { font-size: 13px; line-height: 1.6; max-width: 280px; margin: 0 auto 18px; }
+
+    /* ── TOAST ─────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--navy);
+      color: var(--white);
+      padding: 13px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      gap: 9px;
+      box-shadow: 0 8px 24px rgba(15,39,68,0.3);
+      max-width: 340px;
+    }
+    .toast.show { display: flex; animation: slideUp .3s ease; }
+    .toast.success { border-left: 4px solid var(--green); }
+    .toast.error   { border-left: 4px solid var(--red); }
+    .toast.info    { border-left: 4px solid var(--gold); }
+
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ── GENERATE PROGRESS MODAL ───────────────────────── */
+    .progress-modal-body { padding: 28px 32px; }
+
+    .gen-client-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      transition: background .15s;
+    }
+    .gen-client-item.active { background: #eff6ff; }
+    .gen-client-item.done   { background: #f0fdf4; }
+    .gen-client-item.error  { background: #fff1f2; }
+
+    .gen-status-icon { font-size: 18px; width: 24px; text-align: center; }
+    .gen-client-name { font-size: 14px; font-weight: 600; color: var(--navy); flex: 1; }
+    .gen-step-label  { font-size: 12px; color: var(--text-muted); }
+
+    .gen-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gen-overall {
+      margin-bottom: 24px;
+    }
+
+    .gen-overall-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .progress-bar-bg   { background: var(--border); border-radius: 99px; height: 6px; }
+    .progress-bar-fill { background: var(--blue); border-radius: 99px; height: 6px; transition: width .4s ease; }
+
+    /* ── REPORT PREVIEW MODAL ──────────────────────────── */
+    .report-preview-frame {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    /* ── CLIENT SELECT LIST ────────────────────────────── */
+    .client-check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .client-check-item:hover { background: var(--off-white); }
+    .client-check-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--blue); cursor: pointer; }
+    .client-check-name { font-size: 13.5px; font-weight: 600; color: var(--navy); flex: 1; }
+    .client-check-meta { font-size: 11px; color: var(--text-muted); }
+
+    /* ── MISC ──────────────────────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      color: var(--text-muted); font-size: 13px; font-weight: 600;
+      cursor: pointer; margin-bottom: 18px;
+      background: none; border: none; font-family: 'DM Sans', sans-serif;
+    }
+    .back-btn:hover { color: var(--blue); }
+
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .text-green { color: var(--green); }
+    .text-red   { color: var(--red); }
+    .text-muted { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- LOGIN SCREEN                                       -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-left">
+    <div class="login-left-content">
+      <div class="login-logo">
+        <div class="login-logo-icon">A</div>
+        <div class="login-logo-text">ATLAS</div>
+      </div>
+      <div class="login-tagline">
+        Intelligent wealth<br>management,<br><em>beautifully simple.</em>
+      </div>
+      <div class="login-sub">
+        AI-powered portfolio reports, client relationship tools, and performance analytics — built for modern financial advisors.
+      </div>
+    </div>
+    <div class="login-decoration"></div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-form-title">Welcome back</div>
+    <div class="login-form-sub">Sign in to your advisor dashboard</div>
+
+    <div class="login-input-group">
+      <label class="login-label">Advisor Name</label>
+      <input class="login-input" id="loginName" placeholder="e.g. Sarah Chen" autocomplete="off">
+    </div>
+
+    <div class="login-input-group">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="loginPass" type="password" placeholder="Enter your password">
+    </div>
+
+    <button class="login-btn" onclick="attemptLogin()">Sign In to Atlas</button>
+
+    <div class="login-error" id="loginError">
+      Incorrect password. Check your credentials or contact your administrator.
+    </div>
+
+    <div class="login-footer">
+      Default password: <strong>atlas2026</strong> — change it in Settings after signing in.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- APP SHELL                                          -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="appShell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">A</div>
+        Atlas
+      </div>
+      <div class="logo-sub">Wealth Management</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">◼</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('briefing')">
+        <span class="nav-icon">☀️</span> Morning Briefing
+      </div>
+      <div class="nav-item" onclick="showPage('clients')">
+        <span class="nav-icon">👥</span> Clients
+      </div>
+      <div class="nav-label">Tools</div>
+      <div class="nav-item" onclick="showPage('performance')">
+        <span class="nav-icon">📈</span> Performance
+      </div>
+      <div class="nav-item" onclick="showPage('reports')">
+        <span class="nav-icon">📊</span> Reports
+      </div>
+      <div class="nav-item" onclick="showPage('models')">
+        <span class="nav-icon">🗂</span> Model Portfolios
+      </div>
+      <div class="nav-label">System</div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </nav>
+
+    <div class="sidebar-advisor">
+      <div class="advisor-avatar" id="advisorAvatar">A</div>
+      <div class="advisor-info">
+        <div class="advisor-name" id="advisorName">Advisor</div>
+        <div class="advisor-role">Wealth Advisor</div>
+      </div>
+      <button class="sidebar-logout" title="Sign Out" onclick="logout()">⏻</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <span class="topbar-clock" id="topbarClock"></span>
+        <button class="btn btn-gold" onclick="openGenerateModal()">⚡ Generate Reports</button>
+        <button class="btn btn-primary" onclick="openAddClient()">+ Add Client</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="content page active" id="page-dashboard">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="section-header">
+        <div class="section-title">Client Overview</div>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Risk Profile</th>
+              <th>Holdings</th>
+              <th>Last Contacted</th>
+              <th>Last Report</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MORNING BRIEFING PAGE -->
+    <div class="content page" id="page-briefing">
+      <div class="section-header">
+        <div class="section-title">☀️ Morning Briefing</div>
+        <button class="btn btn-gold" onclick="generateBriefing()">⚡ Generate Today's Briefing</button>
+      </div>
+      <div id="briefingContent">
+        <div class="empty-state">
+          <div class="empty-state-icon">☀️</div>
+          <h3>Start your day with Atlas</h3>
+          <p>Generate a personalized briefing to see who needs attention, what's urgent, and how to prioritize your day.</p>
+          <button class="btn btn-gold" onclick="generateBriefing()">⚡ Generate Briefing</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE PAGE -->
+    <div class="content page" id="page-performance">
+      <div class="section-header">
+        <div class="section-title">Portfolio Performance</div>
+        <button class="btn btn-primary" onclick="refreshPerformance()">↻ Refresh</button>
+      </div>
+      <div id="performanceContent">
+        <div class="empty-state">
+          <div class="empty-state-icon">📈</div>
+          <h3>Click Refresh to load live data</h3>
+          <p>Fetches current prices for all client holdings and shows who's up, who's down, and your biggest movers.</p>
+          <button class="btn btn-primary" onclick="refreshPerformance()">↻ Refresh Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL PORTFOLIOS PAGE -->
+    <div class="content page" id="page-models">
+      <div class="section-header">
+        <div class="section-title">Model Portfolios</div>
+        <button class="btn btn-primary" onclick="openAddModel()">+ New Model</button>
+      </div>
+      <div id="modelsContent"></div>
+    </div>
+
+
+    <div class="content page" id="page-clients">
+      <div class="section-header">
+        <div class="section-title">All Clients</div>
+        <button class="btn btn-primary" onclick="openAddClient()">+ Add Client</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Risk Profile</th>
+              <th>Holdings</th>
+              <th>Notes</th>
+              <th>Last Report</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CLIENT DETAIL PAGE -->
+    <div class="content page" id="page-client-detail">
+      <button class="back-btn" onclick="showPage('clients')">← Back to Clients</button>
+      <div id="clientDetailContent"></div>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div class="content page" id="page-reports">
+      <div class="section-header">
+        <div class="section-title">Report History</div>
+        <button class="btn btn-gold" onclick="openGenerateModal()">⚡ Generate Reports</button>
+      </div>
+      <div class="card" id="reportHistoryCard"></div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="content page" id="page-settings">
+      <div class="section-title" style="margin-bottom:22px">Settings</div>
+
+      <div class="settings-card">
+        <div class="settings-title">🏢 Firm Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Firm Name</label>
+            <input class="form-input" id="setting-firm-name" placeholder="e.g. Atlas Wealth Management">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input class="form-input" id="setting-adviser-name" placeholder="e.g. Sarah Chen">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title">🔑 Anthropic API Key</div>
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input class="form-input" id="setting-api-key" type="password" placeholder="sk-ant-...">
+          <div class="form-hint">Required for AI-powered features.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cloudflare Worker URL</label>
+          <input class="form-input" id="setting-worker-url" placeholder="https://your-worker.workers.dev">
+          <div class="form-hint">Required to use Atlas from GitHub Pages. <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--blue)">Set up a free worker →</a></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title">📧 Email Configuration</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Gmail Address</label>
+            <input class="form-input" id="setting-smtp-user" placeholder="you@gmail.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gmail App Password</label>
+            <input class="form-input" id="setting-smtp-pass" type="password" placeholder="xxxx xxxx xxxx xxxx">
+          </div>
+        </div>
+        <div class="form-hint">Email delivery requires running portfolio_agent.py locally. Reports can also be downloaded directly from Atlas.</div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title">🔒 Security</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input class="form-input" id="setting-new-pass" type="password" placeholder="New password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input class="form-input" id="setting-confirm-pass" type="password" placeholder="Confirm new password">
+          </div>
+        </div>
+        <div class="form-hint">Leave blank to keep current password.</div>
+      </div>
+
+      <button class="btn btn-navy" onclick="saveSettings()" style="min-width:140px">Save Settings</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MODALS                                             -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<!-- ADD / EDIT CLIENT -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="clientModalTitle">Add Client</div>
+      <button class="modal-close" onclick="closeModal('clientModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editClientId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="clientName" placeholder="e.g. Arthur Petersen">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" id="clientEmail" placeholder="client@email.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Risk Profile</label>
+          <select class="form-select" id="clientRisk">
+            <option value="Aggressive">Aggressive</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Conservative">Conservative</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account # (last 3, optional)</label>
+          <input class="form-input" id="clientAccount" placeholder="e.g. 847">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="clientNotes" placeholder="Investment goals, preferences, constraints..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Holdings</label>
+        <div class="holdings-list" id="holdingsList"></div>
+        <button class="add-holding-btn" onclick="addHoldingRow()">+ Add Holding</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE REPORTS: CLIENT SELECTION -->
+<div class="modal-overlay" id="generateSelectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Generate Reports</div>
+      <button class="modal-close" onclick="closeModal('generateSelectModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.65">
+        Atlas will fetch live market data and use AI to generate a personalised portfolio report for each selected client.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Select Clients</label>
+        <div id="generateClientList" style="max-height:240px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:6px"></div>
+      </div>
+      <div id="noApiKeyWarning" style="display:none;background:#fff7ed;border-left:4px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#92400e;margin-top:12px;line-height:1.6">
+        ⚠️ No Anthropic API key found. Add it in <strong>Settings</strong> to enable AI report generation.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('generateSelectModal')">Cancel</button>
+      <button class="btn btn-gold" id="generateStartBtn" onclick="startGeneration()">⚡ Generate Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE REPORTS: PROGRESS -->
+<div class="modal-overlay" id="generateProgressModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Generating Reports…</div>
+    </div>
+    <div class="modal-body" id="generateProgressBody">
+      <div class="gen-overall" id="genOverall">
+        <div class="gen-overall-label" id="genOverallLabel">Starting…</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="genProgressBar" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="genClientStatuses"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="genCloseBtn" onclick="closeModal('generateProgressModal')" disabled>Close</button>
+      <button class="btn btn-primary" id="genViewBtn" onclick="showPage('reports');closeModal('generateProgressModal')" style="display:none">View Reports</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT PREVIEW -->
+<div class="modal-overlay" id="reportPreviewModal">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title" id="reportPreviewTitle">Report Preview</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost btn-sm" id="reportDownloadBtn" onclick="downloadReport()">⬇ Download</button>
+        <button class="modal-close" onclick="closeModal('reportPreviewModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:16px">
+      <iframe class="report-preview-frame" id="reportPreviewFrame"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- MODEL PORTFOLIO MODAL -->
+<div class="modal-overlay" id="modelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modelModalTitle">New Model Portfolio</div>
+      <button class="modal-close" onclick="closeModal('modelModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editModelId">
+      <div class="form-group">
+        <label class="form-label">Model Name</label>
+        <input class="form-input" id="modelName" placeholder="e.g. Aggressive Growth">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Risk Profile</label>
+        <select class="form-select" id="modelRisk">
+          <option>Aggressive</option>
+          <option>Moderate</option>
+          <option>Conservative</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="modelDesc" placeholder="Describe this model's strategy..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Holdings</label>
+        <div class="holdings-list" id="modelHoldingsList"></div>
+        <button class="add-holding-btn" onclick="addModelHoldingRow()">+ Add Holding</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modelModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModel()">Save Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPLY MODEL MODAL -->
+<div class="modal-overlay" id="applyModelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="applyModelTitle">Apply Model to Client</div>
+      <button class="modal-close" onclick="closeModal('applyModelModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">Select a client to apply this model's holdings to. This will replace their current holdings.</p>
+      <div class="form-group">
+        <label class="form-label">Select Client</label>
+        <select class="form-select" id="applyModelClientSelect"></select>
+      </div>
+      <div id="applyModelPreview" style="margin-top:14px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('applyModelModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="applyModelToClient()">Apply Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG CONTACT MODAL -->
+<div class="modal-overlay" id="logEntryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Log Contact</div>
+      <button class="modal-close" onclick="closeModal('logEntryModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="logClientId">
+      <div class="form-group">
+        <label class="form-label">Contact Type</label>
+        <select class="form-select" id="logType">
+          <option>Email</option>
+          <option>Phone Call</option>
+          <option>Meeting</option>
+          <option>Text</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="logNote" placeholder="What was discussed? Any follow-ups needed?"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('logEntryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLogEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAFT EMAIL MODAL -->
+<div class="modal-overlay" id="draftModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="draftModalTitle">Draft Outreach Email</div>
+      <button class="modal-close" onclick="closeModal('draftModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="draftLoadingState" style="text-align:center;padding:32px 0">
+        <div style="display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:14px"></div>
+        <div style="font-size:14px;color:var(--text-muted)" id="draftLoadingLabel">Drafting your email…</div>
+      </div>
+      <div id="draftReadyState" style="display:none">
+        <div class="form-group">
+          <label class="form-label">To</label>
+          <input class="form-input" id="draftTo" readonly style="background:var(--off-white)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input class="form-input" id="draftSubject">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body</label>
+          <textarea class="form-textarea" id="draftBody" style="min-height:260px;font-size:14px;line-height:1.7"></textarea>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:-8px">
+          Edit freely before sending. Click <strong>Mark as Contacted</strong> after you send to update the outreach tracker.
+        </div>
+      </div>
+      <div id="draftErrorState" style="display:none;background:#fee2e2;border-radius:8px;padding:16px;color:#991b1b;font-size:13px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('draftModal')">Cancel</button>
+      <button class="btn btn-ghost" id="draftCopyBtn" onclick="copyDraft()" style="display:none">📋 Copy</button>
+      <button class="btn btn-ghost" id="draftMailtoBtn" onclick="openMailto()" style="display:none">📤 Open in Mail</button>
+      <button class="btn btn-primary" id="draftMarkBtn" onclick="markContacted()" style="display:none">✅ Mark as Contacted</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+
+let state = {
+  clients: [],
+  reportHistory: [],
+  reports: {},
+  models: [],
+  settings: {
+    firmName:    'Atlas Wealth Management',
+    adviserName: '',
+    smtpUser:    '',
+    smtpPass:    '',
+    apiKey:      '',
+    workerUrl:   '',
+    password:    'atlas2026'
+  }
+};
+
+let currentPreviewReportId = null;
+
+// ═══════════════════════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════════════════════
+
+function save() {
+  try { localStorage.setItem('atlas_v2_state', JSON.stringify(state)); } catch(e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('atlas_v2_state');
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {}
+
+  // Seed sample client
+  if (!state.clients || state.clients.length === 0) {
+    state.clients = [{
+      id: 'C001',
+      name: 'Alexander Stenvall',
+      email: 'alex.stenvall@example.com',
+      risk: 'Aggressive',
+      account: '924',
+      notes: 'Long-term growth focus. Comfortable with volatility. Interested in tech and healthcare.',
+      holdings: [
+        { ticker: 'AAPL',  shares: '80',  assetClass: 'Equity' },
+        { ticker: 'MSFT',  shares: '50',  assetClass: 'Equity' },
+        { ticker: 'UNH',   shares: '30',  assetClass: 'Equity' },
+        { ticker: 'QQQ',   shares: '40',  assetClass: 'Equity ETF' },
+        { ticker: 'KLAC',  shares: '20',  assetClass: 'Equity' },
+      ],
+      lastReport: null,
+      lastContacted: null,
+      addedDate: new Date().toISOString()
+    }];
+    state.reportHistory = state.reportHistory || [];
+    state.reports       = state.reports || {};
+    save();
+  }
+  state.reportHistory = state.reportHistory || [];
+  state.reports       = state.reports || {};
+  state.models        = state.models  || [];
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════════════
+
+function attemptLogin() {
+  const name = document.getElementById('loginName').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err  = document.getElementById('loginError');
+
+  if (!name) { err.textContent = 'Please enter your name.'; err.style.display='block'; return; }
+  if (pass !== (state.settings.password || 'atlas2026')) {
+    err.style.display = 'block'; return;
+  }
+
+  err.style.display = 'none';
+  state.settings.adviserName = state.settings.adviserName || name;
+  save();
+  sessionStorage.setItem('atlas_session', name);
+  activateSession(name);
+}
+
+function activateSession(name) {
+  document.getElementById('loginScreen').classList.add('hidden');
+  updateAdvisorUI(name);
+  renderDashboard();
+}
+
+function logout() {
+  sessionStorage.removeItem('atlas_session');
+  document.getElementById('loginName').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+function updateAdvisorUI(name) {
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('advisorAvatar').textContent = initials;
+  document.getElementById('advisorName').textContent   = name;
+}
+
+// Enter key on login
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('loginName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginPass').focus();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════════════════
+
+function tickClock() {
+  const now = new Date();
+  document.getElementById('topbarClock').textContent =
+    now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) + '  ' +
+    now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+}
+
+tickClock();
+setInterval(tickClock, 30000);
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+
+  const titles = { dashboard:'Dashboard', briefing:'Morning Briefing', clients:'Clients', 'client-detail':'Client Detail', performance:'Performance', reports:'Reports', models:'Model Portfolios', settings:'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[page] || 'Atlas';
+
+  const navMap = { dashboard:0, briefing:1, clients:2, performance:3, reports:4, models:5, settings:6 };
+  const navItems = document.querySelectorAll('.nav-item');
+  if (navMap[page] !== undefined) navItems[navMap[page]].classList.add('active');
+
+  if (page === 'dashboard')   renderDashboard();
+  if (page === 'clients')     renderClientsTable();
+  if (page === 'reports')     renderReportHistory();
+  if (page === 'settings')    loadSettingsForm();
+  if (page === 'models')      renderModels();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
+function contactColor(lastContacted) {
+  // Gradates green → amber → red over 14 days. Never contacted = full red.
+  if (!lastContacted) return { color: '#dc2626', bg: '#fee2e2', label: 'Never' };
+  const days = (new Date() - new Date(lastContacted)) / 86400000;
+  const t    = Math.min(days / 14, 1); // 0 = just now, 1 = 14+ days
+  // Interpolate: green(22,163,74) → amber(217,119,6) at t=0.5 → red(220,38,38) at t=1
+  let r, g, b;
+  if (t < 0.5) {
+    const u = t * 2;
+    r = Math.round(22  + (217 - 22)  * u);
+    g = Math.round(163 + (119 - 163) * u);
+    b = Math.round(74  + (6   - 74)  * u);
+  } else {
+    const u = (t - 0.5) * 2;
+    r = Math.round(217 + (220 - 217) * u);
+    g = Math.round(119 + (38  - 119) * u);
+    b = Math.round(6   + (38  - 6)   * u);
+  }
+  const hex   = '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  const dLabel = days < 1 ? 'Today' : days < 2 ? 'Yesterday' : `${Math.floor(days)}d ago`;
+  return { color: hex, bg: hex + '18', label: dLabel };
+}
+
+function renderDashboard() {
+  const now = new Date();
+  const needsContact = state.clients.filter(c => {
+    if (!c.lastContacted) return true;
+    return (now - new Date(c.lastContacted)) / 86400000 > 14;
+  }).length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card highlight">
+      <div class="stat-card-label">Total Clients</div>
+      <div class="stat-card-value">${state.clients.length}</div>
+      <div class="stat-card-sub">Active accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Reports Generated</div>
+      <div class="stat-card-value">${state.reportHistory.length}</div>
+      <div class="stat-card-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Need Outreach</div>
+      <div class="stat-card-value" style="color:${needsContact > 0 ? 'var(--red)' : 'var(--green)'}">
+        ${needsContact}
+      </div>
+      <div class="stat-card-sub">No contact in 14+ days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Positions</div>
+      <div class="stat-card-value">${state.clients.reduce((s,c) => s + (c.holdings||[]).length, 0)}</div>
+      <div class="stat-card-sub">Across all clients</div>
+    </div>
+  `;
+
+  const tbody = document.getElementById('dashboardTableBody');
+  if (state.clients.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+      <div class="empty-state-icon">👥</div>
+      <h3>No clients yet</h3>
+      <p>Add your first client to get started.</p>
+      <button class="btn btn-primary" onclick="openAddClient()">+ Add Client</button>
+    </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.clients.map(c => {
+    const lastRpt   = c.lastReport ? new Date(c.lastReport).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null;
+    const daysSince = c.lastReport ? Math.floor((now - new Date(c.lastReport)) / 86400000) : null;
+    const rptBadge  = lastRpt
+      ? `<span class="badge ${daysSince > 7 ? 'badge-pending' : 'badge-sent'}">${lastRpt}</span>`
+      : `<span class="badge badge-never">Never</span>`;
+
+    const cc = contactColor(c.lastContacted);
+    const contactedCell = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cc.color};flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:600;color:${cc.color}">${cc.label}</span>
+      </div>`;
+
+    return `<tr>
+      <td class="client-name-cell" style="cursor:pointer" onclick="showClientDetail('${c.id}')">${c.name}</td>
+      <td><span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span></td>
+      <td style="font-size:12px">${(c.holdings||[]).map(h=>`<strong>${h.ticker}</strong>`).join(', ') || '—'}</td>
+      <td>${contactedCell}</td>
+      <td>${rptBadge}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="showClientDetail('${c.id}')">View</button>
+          <button class="btn btn-gold btn-sm" onclick="openDraftModal('${c.id}')">✉ Draft</button>
+          <button class="btn btn-primary btn-sm" onclick="openGenerateSingle('${c.id}')">📊 Report</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditClient('${c.id}')">Edit</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLIENTS TABLE
+// ═══════════════════════════════════════════════════════════
+
+function renderClientsTable() {
+  const tbody = document.getElementById('clientsTableBody');
+  if (state.clients.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+      <div class="empty-state-icon">👥</div>
+      <h3>No clients yet</h3>
+      <p>Add your first client to get started.</p>
+      <button class="btn btn-primary" onclick="openAddClient()">+ Add Client</button>
+    </div></td></tr>`;
+    return;
+  }
+
+  const now = new Date();
+  tbody.innerHTML = state.clients.map(c => {
+    const lastRpt   = c.lastReport ? new Date(c.lastReport).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null;
+    const daysSince = c.lastReport ? Math.floor((now - new Date(c.lastReport)) / 86400000) : null;
+    const rptBadge  = lastRpt
+      ? `<span class="badge ${daysSince > 7 ? 'badge-pending' : 'badge-sent'}">${lastRpt}</span>`
+      : `<span class="badge badge-never">Never</span>`;
+
+    return `<tr>
+      <td class="client-name-cell" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
+        ${c.name}${c.account ? `<br><span style="font-size:11px;color:var(--text-muted);font-weight:400">Acct ···${c.account}</span>` : ''}
+      </td>
+      <td style="color:var(--text-muted);font-size:13px">${c.email}</td>
+      <td><span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span></td>
+      <td>${(c.holdings||[]).length} positions</td>
+      <td style="max-width:150px;font-size:12px;color:var(--text-muted)">${c.notes ? c.notes.substring(0,55) + (c.notes.length>55?'…':'') : '—'}</td>
+      <td>${rptBadge}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="showClientDetail('${c.id}')">View</button>
+          <button class="btn btn-primary btn-sm" onclick="openGenerateSingle('${c.id}')">📊</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditClient('${c.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLIENT DETAIL
+// ═══════════════════════════════════════════════════════════
+
+function showClientDetail(id) {
+  const c = state.clients.find(x => x.id === id);
+  if (!c) return;
+
+  const clientReports = state.reportHistory.filter(r => r.clientId === id);
+  const reportsHtml   = clientReports.length === 0
+    ? '<div style="padding:18px 20px;text-align:center;color:var(--text-muted);font-size:13px">No reports generated yet</div>'
+    : clientReports.map(r => {
+        const hasHtml = !!state.reports[r.id];
+        return `<div class="report-item">
+          <div>
+            <div class="report-date">${new Date(r.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+            <div class="report-meta">${r.email}</div>
+          </div>
+          <div class="report-actions">
+            ${hasHtml ? `<button class="btn btn-ghost btn-sm" onclick="openReportPreview('${r.id}','${c.name}')">👁 Preview</button>
+                         <button class="btn btn-ghost btn-sm" onclick="downloadReportById('${r.id}','${c.name}')">⬇</button>` : ''}
+            <span class="badge badge-sent">Generated</span>
+          </div>
+        </div>`;
+      }).join('');
+
+  document.getElementById('clientDetailContent').innerHTML = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-name">${c.name}</div>
+        <div class="detail-email">${c.email}${c.account ? ` · Account ···${c.account}` : ''}</div>
+      </div>
+      <div style="display:flex;gap:9px">
+        <button class="btn btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="openEditClient('${c.id}')">✏️ Edit</button>
+        <button class="btn btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="generatePortalLink('${c.id}')">🔗 Portal</button>
+        <button class="btn btn-gold" onclick="openDraftModal('${c.id}')">✉ Draft Email</button>
+        <button class="btn btn-primary" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25)" onclick="openGenerateSingle('${c.id}')">📊 Report</button>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card-title">Holdings</div>
+        <div>
+          ${(c.holdings||[]).map(h => `
+            <div class="holding-tag">
+              <strong>${h.ticker}</strong>
+              <span>${h.shares} shares · ${h.assetClass}</span>
+            </div>`).join('') || '<span style="color:var(--text-muted);font-size:13px">No holdings added</span>'}
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-title">Profile</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Risk Profile</span>
+            <span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span>
+          </div>
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Last Contacted</span>
+            ${(() => { const cc = contactColor(c.lastContacted); return `<span style="font-size:14px;font-weight:600;color:${cc.color}">${c.lastContacted ? new Date(c.lastContacted).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + ' (' + cc.label + ')' : 'Never'}</span>`; })()}
+          </div>
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Last Report</span>
+            <span style="font-size:14px;font-weight:600">${c.lastReport ? new Date(c.lastReport).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'Never'}</span>
+          </div>
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">Client Since</span>
+            <span style="font-size:14px;font-weight:600">${new Date(c.addedDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card" style="margin-bottom:20px">
+      <div class="detail-card-title" style="padding:20px 20px 0">Notes</div>
+      <div style="padding:0 20px 20px">
+        <textarea class="notes-area" id="notesArea-${c.id}" placeholder="Investment goals, preferences, constraints...">${c.notes || ''}</textarea>
+        <button class="btn btn-ghost btn-sm" style="margin-top:7px" onclick="saveNotes('${c.id}')">Save Notes</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--navy)">Outreach Log</div>
+        <button class="btn btn-ghost btn-sm" onclick="openLogEntry('${c.id}')">+ Log Contact</button>
+      </div>
+      <div id="outreachLog-${c.id}">
+        ${(c.outreachLog||[]).length === 0
+          ? '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">No contact logged yet</div>'
+          : (c.outreachLog||[]).slice().reverse().map(e => `
+            <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start">
+              <div style="flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px"></div>
+              <div style="flex:1">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:3px">${new Date(e.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} · ${e.type}</div>
+                <div style="font-size:13.5px;color:var(--text);line-height:1.6">${e.note}</div>
+              </div>
+            </div>`).join('')
+        }
+      </div>
+    </div>
+
+
+      ${reportsHtml}
+    </div>
+  `;
+
+  showPage('client-detail');
+}
+
+function saveNotes(id) {
+  const c = state.clients.find(x => x.id === id);
+  if (!c) return;
+  c.notes = document.getElementById('notesArea-' + id).value;
+  save();
+  showToast('Notes saved', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADD / EDIT CLIENT
+// ═══════════════════════════════════════════════════════════
+
+function openAddClient() {
+  document.getElementById('clientModalTitle').textContent = 'Add Client';
+  document.getElementById('editClientId').value = '';
+  ['clientName','clientEmail','clientAccount','clientNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('clientRisk').value = 'Aggressive';
+  document.getElementById('holdingsList').innerHTML = '';
+  addHoldingRow();
+  openModal('clientModal');
+}
+
+function openEditClient(id) {
+  const c = state.clients.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('clientModalTitle').textContent = 'Edit Client';
+  document.getElementById('editClientId').value  = id;
+  document.getElementById('clientName').value    = c.name;
+  document.getElementById('clientEmail').value   = c.email;
+  document.getElementById('clientRisk').value    = c.risk;
+  document.getElementById('clientAccount').value = c.account || '';
+  document.getElementById('clientNotes').value   = c.notes || '';
+  document.getElementById('holdingsList').innerHTML = '';
+  (c.holdings || []).forEach(h => addHoldingRow(h.ticker, h.shares, h.assetClass));
+  if ((c.holdings || []).length === 0) addHoldingRow();
+  openModal('clientModal');
+}
+
+function addHoldingRow(ticker='', shares='', assetClass='Equity') {
+  const div = document.createElement('div');
+  div.className = 'holding-row';
+  div.innerHTML = `
+    <input class="form-input h-ticker" placeholder="Ticker" value="${ticker}" style="text-transform:uppercase">
+    <input class="form-input h-shares" placeholder="Shares" value="${shares}" type="number" min="0">
+    <select class="form-select h-class">
+      ${['Equity','Equity ETF','Bond ETF','Preferred ETF','Commodity ETF','Dividend ETF'].map(
+        v => `<option value="${v}" ${assetClass===v?'selected':''}>${v}</option>`
+      ).join('')}
+    </select>
+    <button class="holding-remove" onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.getElementById('holdingsList').appendChild(div);
+}
+
+function saveClient() {
+  const name    = document.getElementById('clientName').value.trim();
+  const email   = document.getElementById('clientEmail').value.trim();
+  const risk    = document.getElementById('clientRisk').value;
+  const account = document.getElementById('clientAccount').value.trim();
+  const notes   = document.getElementById('clientNotes').value.trim();
+  const editId  = document.getElementById('editClientId').value;
+
+  if (!name || !email) { showToast('Name and email are required', 'error'); return; }
+
+  const holdings = [];
+  document.querySelectorAll('.holding-row').forEach(row => {
+    const ticker = row.querySelector('.h-ticker').value.trim().toUpperCase();
+    const shares = row.querySelector('.h-shares').value.trim();
+    const ac     = row.querySelector('.h-class').value;
+    if (ticker && shares) holdings.push({ ticker, shares, assetClass: ac });
+  });
+
+  if (editId) {
+    const c = state.clients.find(x => x.id === editId);
+    if (c) Object.assign(c, { name, email, risk, account, notes, holdings });
+  } else {
+    state.clients.push({ id:'C'+Date.now(), name, email, risk, account, notes, holdings, lastReport:null, lastContacted:null, addedDate:new Date().toISOString() });
+  }
+
+  save();
+  closeModal('clientModal');
+  showToast(editId ? 'Client updated' : 'Client added', 'success');
+  renderDashboard();
+  renderClientsTable();
+}
+
+function deleteClient(id) {
+  if (!confirm('Delete this client? This cannot be undone.')) return;
+  state.clients = state.clients.filter(c => c.id !== id);
+  save();
+  showToast('Client deleted', 'info');
+  renderClientsTable();
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAFT EMAIL
+// ═══════════════════════════════════════════════════════════
+
+let draftClientId = null;
+
+async function openDraftModal(clientId) {
+  const c = state.clients.find(x => x.id === clientId);
+  if (!c) return;
+
+  draftClientId = clientId;
+  document.getElementById('draftModalTitle').textContent = `Draft Email — ${c.name}`;
+
+  // Reset state
+  document.getElementById('draftLoadingState').style.display = 'block';
+  document.getElementById('draftReadyState').style.display   = 'none';
+  document.getElementById('draftErrorState').style.display   = 'none';
+  ['draftCopyBtn','draftMailtoBtn','draftMarkBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+
+  openModal('draftModal');
+
+  if (!state.settings.apiKey) {
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftErrorState').style.display   = 'block';
+    document.getElementById('draftErrorState').textContent     = '⚠️ No Anthropic API key configured. Add it in Settings to use AI drafting.';
+    return;
+  }
+
+  // Build context about this client
+  const holdingsSummary = (c.holdings || []).map(h => `${h.ticker} (${h.shares} shares, ${h.assetClass})`).join(', ') || 'no holdings on file';
+  const lastReportDate  = c.lastReport ? new Date(c.lastReport).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'never';
+  const daysSinceContact = c.lastContacted ? Math.floor((new Date() - new Date(c.lastContacted)) / 86400000) : null;
+  const contactContext  = daysSinceContact === null ? "This client has never been contacted." : `Last contact was ${daysSinceContact} day${daysSinceContact===1?'':'s'} ago.`;
+
+  // Check if there's a recent report to reference
+  const recentReportId  = state.reportHistory.filter(r => r.clientId === clientId)[0]?.id;
+  const hasRecentReport = !!recentReportId;
+
+  const advisorName = state.settings.adviserName || sessionStorage.getItem('atlas_session') || 'Your Advisor';
+  const firmName    = state.settings.firmName || 'Atlas Wealth Management';
+
+  const labels = ['Personalizing tone…', 'Reviewing portfolio context…', 'Drafting your email…'];
+  let li = 0;
+  const labelInterval = setInterval(() => {
+    if (li < labels.length - 1) document.getElementById('draftLoadingLabel').textContent = labels[++li];
+  }, 900);
+
+  try {
+    const prompt = `You are ${advisorName}, a financial advisor at ${firmName}.
+Write a warm, professional, brief outreach email to a client. It should feel personal and human — not generic or template-like.
+
+CLIENT CONTEXT
+  Name: ${c.name}
+  Email: ${c.email}
+  Risk profile: ${c.risk}
+  Holdings: ${holdingsSummary}
+  Notes: ${c.notes || 'None'}
+  Last report sent: ${lastReportDate}
+  ${contactContext}
+  ${hasRecentReport ? 'A portfolio report was recently generated — you can reference their recent performance.' : ''}
+
+Write a short, genuine check-in email (3-4 short paragraphs max). The subject line should be natural, not salesy.
+Mention something specific about their portfolio or situation based on the context above.
+Close warmly with an invitation to connect.
+
+Return ONLY a JSON object with exactly these two keys, no markdown:
+{
+  "subject": "Email subject line here",
+  "body": "Full email body here, use \\n for line breaks"
+}`;
+
+    const data = await callClaude([{ role: 'user', content: prompt }], 800);
+    const raw  = (data.content || []).map(b => b.text || '').join('').trim()
+                   .replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+    const parsed = JSON.parse(raw);
+
+    document.getElementById('draftTo').value      = c.email;
+    document.getElementById('draftSubject').value = parsed.subject || '';
+    document.getElementById('draftBody').value    = parsed.body || '';
+
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftReadyState').style.display   = 'block';
+    ['draftCopyBtn','draftMailtoBtn','draftMarkBtn'].forEach(id => document.getElementById(id).style.display = 'inline-flex');
+
+  } catch(err) {
+    clearInterval(labelInterval);
+    document.getElementById('draftLoadingState').style.display = 'none';
+    document.getElementById('draftErrorState').style.display   = 'block';
+    document.getElementById('draftErrorState').textContent     = '❌ Failed to draft email: ' + (err.message || 'Unknown error');
+  }
+}
+
+function copyDraft() {
+  const subject = document.getElementById('draftSubject').value;
+  const body    = document.getElementById('draftBody').value;
+  navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`)
+    .then(() => showToast('Email copied to clipboard', 'success'));
+}
+
+function openMailto() {
+  const to      = document.getElementById('draftTo').value;
+  const subject = encodeURIComponent(document.getElementById('draftSubject').value);
+  const body    = encodeURIComponent(document.getElementById('draftBody').value);
+  window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_blank');
+}
+
+function markContacted(closeAfter = true) {
+  if (!draftClientId) return;
+  const c = state.clients.find(x => x.id === draftClientId);
+  if (!c) return;
+  c.lastContacted = new Date().toISOString();
+  save();
+  showToast(`${c.name} marked as contacted`, 'success');
+  if (closeAfter) closeModal('draftModal');
+  renderDashboard();
+  renderClientsTable();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GENERATE REPORTS — SELECTION MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openGenerateModal() {
+  populateClientChecklist(state.clients.map(c => c.id));
+  openModal('generateSelectModal');
+}
+
+function openGenerateSingle(id) {
+  populateClientChecklist([id]);
+  openModal('generateSelectModal');
+}
+
+function populateClientChecklist(preChecked) {
+  const list = document.getElementById('generateClientList');
+  const warn = document.getElementById('noApiKeyWarning');
+
+  warn.style.display = state.settings.apiKey ? 'none' : 'block';
+  document.getElementById('generateStartBtn').disabled = !state.settings.apiKey;
+
+  if (state.clients.length === 0) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">No clients added yet.</div>';
+    return;
+  }
+
+  list.innerHTML = state.clients.map(c => `
+    <div class="client-check-item">
+      <input type="checkbox" value="${c.id}" id="chk-${c.id}" ${preChecked.includes(c.id)?'checked':''}>
+      <label for="chk-${c.id}" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer">
+        <span class="client-check-name">${c.name}</span>
+        <span class="client-check-meta">${(c.holdings||[]).length} positions</span>
+        ${c.lastReport ? `<span class="badge badge-sent" style="font-size:10px">${new Date(c.lastReport).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>` : `<span class="badge badge-never" style="font-size:10px">Never</span>`}
+      </label>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GENERATE REPORTS — CORE ENGINE
+// ═══════════════════════════════════════════════════════════
+
+async function startGeneration() {
+  const checked = [...document.querySelectorAll('#generateClientList input[type=checkbox]:checked')].map(cb => cb.value);
+  if (checked.length === 0) { showToast('Select at least one client', 'error'); return; }
+
+  closeModal('generateSelectModal');
+
+  const clients = state.clients.filter(c => checked.includes(c.id));
+
+  // Setup progress modal
+  document.getElementById('genCloseBtn').disabled = true;
+  document.getElementById('genViewBtn').style.display = 'none';
+  document.getElementById('genOverallLabel').textContent = `Generating ${clients.length} report${clients.length>1?'s':''}…`;
+  document.getElementById('genProgressBar').style.width = '0%';
+
+  const statusEl = document.getElementById('genClientStatuses');
+  statusEl.innerHTML = clients.map(c => `
+    <div class="gen-client-item" id="gen-status-${c.id}">
+      <div class="gen-status-icon" id="gen-icon-${c.id}">⏳</div>
+      <div style="flex:1">
+        <div class="gen-client-name">${c.name}</div>
+        <div class="gen-step-label" id="gen-step-${c.id}">Waiting…</div>
+      </div>
+    </div>`).join('');
+
+  openModal('generateProgressModal');
+
+  // Fetch SPY once
+  let spyChange = 0;
+  try {
+    spyChange = await fetchWeeklyChange('SPY');
+  } catch(e) {}
+
+  let done = 0;
+  for (const client of clients) {
+    await generateClientReport(client, spyChange);
+    done++;
+    document.getElementById('genProgressBar').style.width = (done / clients.length * 100) + '%';
+  }
+
+  document.getElementById('genOverallLabel').textContent = `✅ ${clients.length} report${clients.length>1?'s':''} complete`;
+  document.getElementById('genProgressBar').style.width = '100%';
+  document.getElementById('genCloseBtn').disabled = false;
+  document.getElementById('genViewBtn').style.display = 'inline-flex';
+  save();
+}
+
+function setGenStatus(clientId, icon, step, cssClass) {
+  const row  = document.getElementById('gen-status-' + clientId);
+  const ico  = document.getElementById('gen-icon-'   + clientId);
+  const stp  = document.getElementById('gen-step-'   + clientId);
+  if (row) { row.className = 'gen-client-item ' + (cssClass||''); }
+  if (ico) ico.innerHTML = icon;
+  if (stp) stp.textContent = step;
+}
+
+async function generateClientReport(client, spyChange) {
+  const clientId = client.id;
+  setGenStatus(clientId, '<div class="gen-spinner"></div>', 'Fetching market data…', 'active');
+
+  try {
+    // 1. Fetch prices for all holdings in parallel
+    const tickers = (client.holdings || []).map(h => h.ticker);
+    const perfMap = {};
+
+    await Promise.all(tickers.map(async ticker => {
+      try {
+        const change = await fetchWeeklyChange(ticker);
+        const price  = await fetchCurrentPrice(ticker);
+        perfMap[ticker] = { change_pct: change, price_now: price };
+      } catch(e) {
+        console.warn('Could not fetch', ticker, e);
+      }
+    }));
+
+    // 2. Compute portfolio stats
+    const stats = computeStats(client.holdings, perfMap);
+
+    setGenStatus(clientId, '<div class="gen-spinner"></div>', 'AI analyzing portfolio…', 'active');
+
+    // 3. Call Claude API
+    const content = await callClaudeForReport(client, stats, spyChange, perfMap);
+
+    setGenStatus(clientId, '<div class="gen-spinner"></div>', 'Building report…', 'active');
+
+    // 4. Build HTML report
+    const reportHtml = buildHtmlReport(client, content, perfMap, stats, spyChange);
+
+    // 5. Store
+    const reportId  = 'R' + Date.now() + '_' + clientId;
+    const entry     = { id: reportId, clientId, clientName: client.name, email: client.email, date: new Date().toISOString() };
+    state.reportHistory.unshift(entry);
+    state.reports[reportId] = reportHtml;
+    client.lastReport = entry.date;
+
+    setGenStatus(clientId, '✅', 'Report ready — preview or download below', 'done');
+
+  } catch(err) {
+    console.error('Report generation failed for', client.name, err);
+    setGenStatus(clientId, '❌', 'Error: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MARKET DATA (Yahoo Finance via allorigins proxy)
+// ═══════════════════════════════════════════════════════════
+
+async function fetchYahooData(ticker, range='10d', interval='1d') {
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&includePrePost=false`;
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+  const res  = await fetch(proxyUrl);
+  const data = await res.json();
+  const result = data?.chart?.result?.[0];
+  if (!result) throw new Error(`No data for ${ticker}`);
+  return result;
+}
+
+async function fetchWeeklyChange(ticker) {
+  const result = await fetchYahooData(ticker);
+  const closes = result.indicators?.quote?.[0]?.close?.filter(v => v != null);
+  if (!closes || closes.length < 2) return 0;
+  const now  = closes[closes.length - 1];
+  const prev = closes[Math.max(0, closes.length - 6)];
+  return parseFloat(((now - prev) / prev * 100).toFixed(2));
+}
+
+async function fetchCurrentPrice(ticker) {
+  const result = await fetchYahooData(ticker);
+  const closes = result.indicators?.quote?.[0]?.close?.filter(v => v != null);
+  if (!closes || closes.length === 0) return 0;
+  return parseFloat(closes[closes.length - 1].toFixed(2));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PORTFOLIO STATS
+// ═══════════════════════════════════════════════════════════
+
+function computeStats(holdings, perfMap) {
+  let total = 0, totalPrev = 0;
+  const values = [];
+
+  for (const h of (holdings || [])) {
+    const p = perfMap[h.ticker];
+    if (!p || !p.price_now) continue;
+    const shares = parseFloat(h.shares);
+    const val    = shares * p.price_now;
+    const chg    = p.change_pct / 100;
+    const prev   = val / (1 + chg);
+    total     += val;
+    totalPrev += prev;
+    values.push({ ticker: h.ticker, val });
+  }
+
+  const totalChange = total - totalPrev;
+  const changePct   = totalPrev > 0 ? (totalChange / totalPrev * 100) : 0;
+
+  const concentrationFlags = values
+    .filter(v => total > 0 && v.val / total * 100 > 35)
+    .map(v => [v.ticker, (v.val / total * 100).toFixed(1)]);
+
+  const numHoldings    = values.length;
+  const diversification = Math.min(numHoldings / 8 * 40, 40);
+  const maxPct          = values.length ? Math.max(...values.map(v => v.val / total * 100)) : 100;
+  const concentration   = maxPct > 20 ? Math.max(0, 30 - (maxPct - 20) * 0.5) : 30;
+  const perfScore       = Math.min(Math.max(changePct * 3 + 15, 0), 30);
+  const healthScore     = Math.max(0, Math.min(100, Math.round(diversification + concentration + perfScore)));
+
+  return {
+    total_value:          parseFloat(total.toFixed(2)),
+    total_change:         parseFloat(totalChange.toFixed(2)),
+    change_pct:           parseFloat(changePct.toFixed(2)),
+    concentration_flags:  concentrationFlags,
+    health_score:         healthScore,
+    values
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLAUDE API CALL
+// ═══════════════════════════════════════════════════════════
+
+async function callClaudeForReport(client, stats, spyChange, perfMap) {
+  const holdingLines = (client.holdings || []).map(h => {
+    const p = perfMap[h.ticker];
+    if (!p) return `  - ${h.ticker} (${h.assetClass}): ${h.shares} shares | price unavailable`;
+    return `  - ${h.ticker} (${h.assetClass}): ${h.shares} shares | price $${p.price_now} | weekly change ${p.change_pct > 0 ? '+' : ''}${p.change_pct}%`;
+  }).join('\n');
+
+  const mood     = marketMood(spyChange);
+  const vsBench  = (stats.change_pct - spyChange).toFixed(2);
+  const milestone = checkMilestone(stats.total_value, stats.total_value - stats.total_change);
+  const milestoneNote = milestone
+    ? `\nIMPORTANT: The client just crossed $${milestone.toLocaleString()} for the first time! Celebrate this warmly.`
+    : '';
+
+  const prompt = `You are a professional, warm investment adviser writing a weekly portfolio report.
+Be clear, human, and avoid jargon. Write in second person ("your portfolio").
+
+CLIENT
+  Name: ${client.name}
+  Risk profile: ${client.risk}
+
+PORTFOLIO THIS WEEK
+  Total value: $${stats.total_value.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}
+  Week change: ${stats.total_change >= 0 ? '+' : ''}$${stats.total_change.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} (${stats.change_pct >= 0 ? '+' : ''}${stats.change_pct}%)
+  S&P 500 this week: ${spyChange >= 0 ? '+' : ''}${spyChange}%
+  vs benchmark: ${vsBench >= 0 ? '+' : ''}${vsBench}%
+  Market mood: ${mood}
+  Health score: ${stats.health_score}/100
+${milestoneNote}
+
+HOLDINGS
+${holdingLines}
+
+Return ONLY a valid JSON object with these exact keys — no markdown, no backticks, no preamble:
+{
+  "summary": "2-3 sentence plain-English summary of overall performance",
+  "vs_benchmark": "1-2 sentences comparing return to S&P 500",
+  "what_it_means": "1-2 sentences translating performance into real-life terms",
+  "health_commentary": "1 sentence explaining the health score",
+  "holdings": [
+    {
+      "ticker": "TICKER",
+      "summary": "1-2 sentences on what this holding did and why it matters",
+      "verdict": "One of: Strong Hold / Hold / Watch Closely / Consider Reducing"
+    }
+  ],
+  "key_themes": ["theme 1", "theme 2", "theme 3"],
+  "looking_ahead": "2-3 sentences on what to watch next week",
+  "adviser_note": "One warm, personalised sentence appropriate for their risk profile",
+  "audio_script": "Warm 60-second script starting with: Good morning ${client.name}, this is your weekly portfolio update."
+}`;
+
+  const data = await callClaude([{ role: 'user', content: prompt }], 2000);
+  const raw  = (data.content || []).map(b => b.text || '').join('').trim()
+                 .replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+
+  return JSON.parse(raw);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REPORT HTML BUILDER
+// ═══════════════════════════════════════════════════════════
+
+function marketMood(spyChange) {
+  if (spyChange >= 1.5) return 'Bull';
+  if (spyChange >= 0)   return 'Neutral';
+  if (spyChange >= -1.5)return 'Cautious';
+  return 'Bear';
+}
+
+function moodColor(mood) {
+  return { Bull:'#16a34a', Neutral:'#d97706', Cautious:'#ea580c', Bear:'#dc2626' }[mood] || '#d97706';
+}
+
+function moodDesc(mood) {
+  return {
+    Bull:     'Markets had a strong week with broad gains across sectors.',
+    Neutral:  'Markets were relatively flat with mixed signals this week.',
+    Cautious: 'Markets showed some weakness amid broader uncertainty.',
+    Bear:     'Markets faced significant selling pressure this week.'
+  }[mood] || '';
+}
+
+function verdictColor(verdict) {
+  return { 'Strong Hold':'#16a34a', 'Hold':'#2563eb', 'Watch Closely':'#d97706', 'Consider Reducing':'#dc2626' }[verdict] || '#2563eb';
+}
+
+function checkMilestone(now, prev) {
+  for (const m of [10000,25000,50000,75000,100000,150000,200000,250000,500000,1000000]) {
+    if (prev < m && now >= m) return m;
+  }
+  return null;
+}
+
+function buildHtmlReport(client, content, perfMap, stats, spyChange) {
+  const week      = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const firmName  = state.settings.firmName || 'Atlas Wealth Management';
+  const mood      = marketMood(spyChange);
+  const mc        = moodColor(mood);
+  const md        = moodDesc(mood);
+  const chgColor  = stats.total_change >= 0 ? '#16a34a' : '#dc2626';
+  const chgArrow  = stats.total_change >= 0 ? '▲' : '▼';
+  const spyColor  = spyChange >= 0 ? '#16a34a' : '#dc2626';
+  const spyArrow  = spyChange >= 0 ? '▲' : '▼';
+  const vsBench   = stats.change_pct - spyChange;
+  const vsColor   = vsBench >= 0 ? '#16a34a' : '#dc2626';
+  const vsArrow   = vsBench >= 0 ? '▲' : '▼';
+  const hColor    = stats.health_score >= 75 ? '#16a34a' : stats.health_score >= 50 ? '#d97706' : '#dc2626';
+  const milestone = checkMilestone(stats.total_value, stats.total_value - stats.total_change);
+  const milestoneHtml = milestone
+    ? `<div style="background:#f0fdf4;border-left:4px solid #16a34a;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:14px;font-size:13px;color:#14532d;line-height:1.6">🎉 <strong>Milestone!</strong> Your portfolio crossed $${milestone.toLocaleString()} for the first time. Congratulations!</div>`
+    : '';
+
+  const riskHtml = stats.concentration_flags.map(([t,p]) =>
+    `<div style="background:#fff7ed;border-left:4px solid #ea580c;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:13px;color:#9a3412;line-height:1.6">⚠️ <strong>${t}</strong> makes up ${p}% of your portfolio — concentration risk is elevated.</div>`
+  ).join('');
+
+  const holdingsMap = {};
+  (content.holdings || []).forEach(h => { holdingsMap[h.ticker] = h; });
+
+  // Build chart data
+  const chartTickers = [], chartValues = [], chartChanges = [], pieColors = [], barColors = [];
+  const palette = ['#1e3a5f','#2563eb','#3b82f6','#60a5fa','#93c5fd','#1d4ed8','#0ea5e9','#0369a1'];
+  let pi = 0;
+  for (const h of (client.holdings || [])) {
+    const p = perfMap[h.ticker];
+    if (!p || !p.price_now) continue;
+    const val = parseFloat(h.shares) * p.price_now;
+    chartTickers.push(h.ticker);
+    chartValues.push(parseFloat(val.toFixed(2)));
+    chartChanges.push(p.change_pct);
+    pieColors.push(palette[pi++ % palette.length]);
+    barColors.push(p.change_pct >= 0 ? '#16a34a' : '#dc2626');
+  }
+
+  const rows = (client.holdings || []).map(h => {
+    const p  = perfMap[h.ticker];
+    if (!p) return '';
+    const color   = p.change_pct >= 0 ? '#16a34a' : '#dc2626';
+    const arrow   = p.change_pct >= 0 ? '▲' : '▼';
+    const hc      = holdingsMap[h.ticker] || {};
+    const verdict = hc.verdict || 'Hold';
+    const vc      = verdictColor(verdict);
+    return `<tr>
+      <td><strong>${h.ticker}</strong><br><span style="font-size:11px;color:#64748b">${h.assetClass}</span></td>
+      <td>${h.shares}</td>
+      <td>$${p.price_now}</td>
+      <td style="color:${color};font-weight:700">${arrow} ${p.change_pct >= 0 ? '+' : ''}${p.change_pct}%</td>
+      <td><span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:${vc}20;color:${vc};border:1px solid ${vc}40">${verdict}</span></td>
+    </tr>
+    <tr><td colspan="5" style="padding:6px 12px 14px;font-size:13px;color:#475569;font-style:italic;background:#fafbfd">${hc.summary || ''}</td></tr>`;
+  }).join('');
+
+  const themesHtml = (content.key_themes || []).map(t => `<li>${t}</li>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Portfolio Report — ${client.name}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#eef2f7;color:#1e3a5f}
+.wrapper{max-width:760px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 32px rgba(30,58,95,.15)}
+.header{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:40px 44px 32px}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start}
+.firm-name{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:9px}
+.header h1{font-size:24px;font-weight:700;color:#fff}
+.header-date{font-size:12px;color:rgba(255,255,255,0.55);margin-top:5px}
+.client-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;text-align:right}
+.client-name{font-size:19px;font-weight:700;color:#fff;text-align:right}
+.risk-badge{display:inline-block;margin-top:7px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:3px 13px;border-radius:99px;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.stats-bar{background:#1e3a5f;display:flex}
+.stat{flex:1;padding:16px 18px;border-right:1px solid rgba(255,255,255,0.08)}
+.stat:last-child{border-right:none}
+.stat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:4px}
+.stat-value{font-size:17px;font-weight:700;color:#fff}
+.body{padding:32px 44px}
+.audio-card{background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:10px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.audio-icon{width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;border:none;color:white}
+.audio-text h4{color:#fff;font-size:13px;margin-bottom:3px}
+.audio-text p{color:rgba(255,255,255,0.6);font-size:12px}
+.audio-transcript{background:rgba(255,255,255,0.08);border-radius:8px;padding:13px 17px;margin-top:11px;display:none}
+.audio-transcript p{color:rgba(255,255,255,0.85);font-size:13px;line-height:1.7;font-style:italic}
+.health-card{background:#f4f7fb;border-radius:10px;padding:18px 22px;margin-bottom:24px;border:1px solid #e2e8f0}
+.health-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.health-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#2563eb;font-weight:700}
+.health-score{font-size:30px;font-weight:700;color:${hColor}}
+.health-bar-bg{background:#e2e8f0;border-radius:99px;height:7px}
+.health-bar-fill{background:${hColor};border-radius:99px;height:7px;width:${stats.health_score}%}
+.health-commentary{font-size:13px;color:#475569;margin-top:9px;line-height:1.6}
+.summary-grid{display:flex;gap:14px;margin-bottom:14px}
+.summary-card{flex:1;background:#f4f7fb;border-radius:10px;padding:16px 18px;border:1px solid #e2e8f0}
+.summary-card h4{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#2563eb;margin-bottom:7px}
+.summary-card p{font-size:13px;color:#334155;line-height:1.6}
+.mood-badge{display:inline-block;background:${mc}20;border:1px solid ${mc}40;color:${mc};padding:3px 13px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.charts-row{display:flex;gap:18px;margin-bottom:24px}
+.chart-box{flex:1;background:#f4f7fb;border-radius:10px;padding:20px;border:1px solid #e2e8f0}
+.chart-box h3{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#2563eb;text-align:center;margin-bottom:14px}
+h2{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:7px;margin-top:32px;margin-bottom:14px}
+p{font-size:14px;line-height:1.8;color:#334155;margin-bottom:9px}
+ul{padding-left:16px}
+li{font-size:14px;line-height:1.8;color:#334155;margin-bottom:5px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#1e3a5f}
+th{padding:10px 12px;text-align:left;color:#fff;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600}
+td{padding:9px 12px;border-bottom:1px solid #e8eef5;color:#334155;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.footer{background:#1e3a5f;padding:22px 44px;display:flex;justify-content:space-between;align-items:center}
+.footer-left{font-size:11px;color:rgba(255,255,255,0.35);line-height:1.7}
+.footer-right{font-size:11px;color:rgba(255,255,255,0.35);text-align:right;line-height:1.7}
+</style></head><body>
+<div class="wrapper">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="firm-name">${firmName}</div>
+        <h1>Weekly Portfolio Report</h1>
+        <div class="header-date">${week}</div>
+      </div>
+      <div>
+        <div class="client-label">Prepared for</div>
+        <div class="client-name">${client.name}</div>
+        <div style="text-align:right"><span class="risk-badge">${client.risk} Profile</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-label">Portfolio Value</div><div class="stat-value">$${stats.total_value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+    <div class="stat"><div class="stat-label">Week Change</div><div class="stat-value" style="color:${chgColor}">${chgArrow} $${Math.abs(stats.total_change).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+    <div class="stat"><div class="stat-label">Week Return</div><div class="stat-value" style="color:${chgColor}">${chgArrow} ${Math.abs(stats.change_pct).toFixed(2)}%</div></div>
+    <div class="stat"><div class="stat-label">vs S&P 500</div><div class="stat-value" style="color:${vsColor}">${vsArrow} ${Math.abs(vsBench).toFixed(2)}%</div></div>
+    <div class="stat"><div class="stat-label">S&P 500</div><div class="stat-value" style="color:${spyColor}">${spyArrow} ${Math.abs(spyChange).toFixed(2)}%</div></div>
+  </div>
+
+  <div class="body">
+    <h2>Your Audio Summary</h2>
+    <div class="audio-card">
+      <button class="audio-icon" onclick="const t=document.getElementById('at');const b=this;t.style.display=t.style.display==='block'?'none':'block';b.textContent=t.style.display==='block'?'▼':'▶'">▶</button>
+      <div style="flex:1">
+        <h4>60-Second Portfolio Briefing</h4>
+        <p>Tap to read your personalised weekly summary</p>
+        <div class="audio-transcript" id="at"><p>${content.audio_script || ''}</p></div>
+      </div>
+    </div>
+
+    ${milestoneHtml}
+    ${riskHtml}
+
+    <h2>Portfolio Health Score</h2>
+    <div class="health-card">
+      <div class="health-top">
+        <div>
+          <div class="health-label">Overall Health</div>
+          <div class="health-commentary">${content.health_commentary || ''}</div>
+        </div>
+        <div class="health-score">${stats.health_score}<span style="font-size:15px;color:#94a3b8">/100</span></div>
+      </div>
+      <div class="health-bar-bg"><div class="health-bar-fill"></div></div>
+    </div>
+
+    <h2>Market Mood</h2>
+    <div class="summary-card" style="margin-bottom:24px">
+      <span class="mood-badge">${mood}</span>
+      <p>${md}</p>
+    </div>
+
+    <h2>Portfolio Summary</h2>
+    <div class="summary-grid"><div class="summary-card"><h4>This Week</h4><p>${content.summary || ''}</p></div></div>
+    <div class="summary-grid">
+      <div class="summary-card"><h4>vs The Market</h4><p>${content.vs_benchmark || ''}</p></div>
+      <div class="summary-card"><h4>What This Means For You</h4><p>${content.what_it_means || ''}</p></div>
+    </div>
+
+    <h2>Visual Breakdown</h2>
+    <div class="charts-row">
+      <div class="chart-box"><h3>Allocation</h3><canvas id="pieChart"></canvas></div>
+      <div class="chart-box"><h3>Weekly Performance</h3><canvas id="barChart"></canvas></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
+    <script>
+      new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:${JSON.stringify(chartTickers)},datasets:[{data:${JSON.stringify(chartValues)},backgroundColor:${JSON.stringify(pieColors)},borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12,color:'#1e3a5f'}}}}});
+      new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:${JSON.stringify(chartTickers)},datasets:[{label:'Weekly Change %',data:${JSON.stringify(chartChanges)},backgroundColor:${JSON.stringify(barColors)},borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%',color:'#1e3a5f'},grid:{color:'#e2e8f0'}},x:{ticks:{color:'#1e3a5f'},grid:{display:false}}}}});
+    <\/script>
+
+    <h2>Holdings Breakdown</h2>
+    <table>
+      <thead><tr><th>Ticker</th><th>Shares</th><th>Price</th><th>Weekly Change</th><th>Verdict</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <h2>Key Themes This Week</h2>
+    <ul>${themesHtml}</ul>
+
+    <h2>Looking Ahead</h2>
+    <p>${content.looking_ahead || ''}</p>
+
+    <h2>Adviser's Note</h2>
+    <p style="font-style:italic;color:#1e3a5f;border-left:3px solid #2563eb;padding-left:15px">${content.adviser_note || ''}</p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">This report is for informational purposes only<br>and does not constitute investment advice.</div>
+    <div class="footer-right">© ${new Date().getFullYear()} ${firmName}<br>Past performance is not indicative of future results.</div>
+  </div>
+</div>
+</body></html>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REPORT HISTORY PAGE
+// ═══════════════════════════════════════════════════════════
+
+function renderReportHistory() {
+  const card = document.getElementById('reportHistoryCard');
+  if (state.reportHistory.length === 0) {
+    card.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📊</div>
+      <h3>No reports yet</h3>
+      <p>Generate your first report to see it here.</p>
+      <button class="btn btn-gold" onclick="openGenerateModal()">⚡ Generate Report</button>
+    </div>`;
+    return;
+  }
+
+  card.innerHTML = state.reportHistory.map(r => {
+    const hasHtml = !!state.reports[r.id];
+    return `<div class="report-item">
+      <div>
+        <div class="report-date">${r.clientName}</div>
+        <div class="report-meta">${new Date(r.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} · ${r.email}</div>
+      </div>
+      <div class="report-actions">
+        ${hasHtml ? `
+          <button class="btn btn-ghost btn-sm" onclick="openReportPreview('${r.id}','${r.clientName}')">👁 Preview</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadReportById('${r.id}','${r.clientName}')">⬇ Download</button>
+        ` : ''}
+        <span class="badge badge-sent">Generated</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REPORT PREVIEW
+// ═══════════════════════════════════════════════════════════
+
+function openReportPreview(reportId, clientName) {
+  const html = state.reports[reportId];
+  if (!html) { showToast('Report HTML not found', 'error'); return; }
+  currentPreviewReportId = reportId;
+  document.getElementById('reportPreviewTitle').textContent = `Report — ${clientName}`;
+  document.getElementById('reportDownloadBtn').dataset.reportId = reportId;
+  document.getElementById('reportDownloadBtn').dataset.clientName = clientName;
+  const frame = document.getElementById('reportPreviewFrame');
+  frame.srcdoc = html;
+  openModal('reportPreviewModal');
+}
+
+function downloadReport() {
+  const btn        = document.getElementById('reportDownloadBtn');
+  const reportId   = btn.dataset.reportId;
+  const clientName = btn.dataset.clientName;
+  downloadReportById(reportId, clientName);
+}
+
+function downloadReportById(reportId, clientName) {
+  const html = state.reports[reportId];
+  if (!html) { showToast('Report not found', 'error'); return; }
+  const blob = new Blob([html], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `Atlas_Report_${clientName.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Report downloaded', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════════
+
+function loadSettingsForm() {
+  const s = state.settings;
+  document.getElementById('setting-firm-name').value    = s.firmName    || '';
+  document.getElementById('setting-adviser-name').value = s.adviserName || '';
+  document.getElementById('setting-smtp-user').value    = s.smtpUser    || '';
+  document.getElementById('setting-smtp-pass').value    = s.smtpPass    || '';
+  document.getElementById('setting-api-key').value      = s.apiKey      || '';
+  document.getElementById('setting-worker-url').value   = s.workerUrl   || '';
+  document.getElementById('setting-new-pass').value     = '';
+  document.getElementById('setting-confirm-pass').value = '';
+}
+
+function saveSettings() {
+  const newPass     = document.getElementById('setting-new-pass').value;
+  const confirmPass = document.getElementById('setting-confirm-pass').value;
+
+  if (newPass || confirmPass) {
+    if (newPass !== confirmPass) { showToast('Passwords do not match', 'error'); return; }
+    if (newPass.length < 6)     { showToast('Password must be at least 6 characters', 'error'); return; }
+    state.settings.password = newPass;
+  }
+
+  state.settings.firmName    = document.getElementById('setting-firm-name').value.trim();
+  state.settings.adviserName = document.getElementById('setting-adviser-name').value.trim();
+  state.settings.smtpUser    = document.getElementById('setting-smtp-user').value.trim();
+  state.settings.smtpPass    = document.getElementById('setting-smtp-pass').value.trim();
+  state.settings.apiKey      = document.getElementById('setting-api-key').value.trim();
+  state.settings.workerUrl   = document.getElementById('setting-worker-url').value.trim().replace(/\/$/,'');
+
+  const sessionName = sessionStorage.getItem('atlas_session') || state.settings.adviserName;
+  if (sessionName) updateAdvisorUI(sessionName);
+
+  save();
+  showToast('Settings saved', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLAUDE API HELPER
+// ═══════════════════════════════════════════════════════════
+
+async function callClaude(messages, maxTokens = 1200) {
+  const { apiKey, workerUrl } = state.settings;
+  if (!apiKey) throw new Error('No API key configured. Add it in Settings.');
+
+  const payload = {
+    model: 'claude-sonnet-4-5',
+    max_tokens: maxTokens,
+    messages
+  };
+
+  // Use Cloudflare worker proxy if configured, otherwise try direct
+  if (workerUrl) {
+    const res = await fetch(workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey, payload })
+    });
+    const text = await res.text();
+    if (!text) throw new Error('Worker returned empty response');
+    let data;
+    try { data = JSON.parse(text); } catch(e) { throw new Error('Worker returned invalid JSON: ' + text.slice(0,100)); }
+    if (!res.ok) throw new Error(data?.error?.message || `Worker error ${res.status}`);
+    return data;
+  } else {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+    return await res.json();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MORNING BRIEFING
+// ═══════════════════════════════════════════════════════════
+
+async function generateBriefing() {
+  const el = document.getElementById('briefingContent');
+  el.innerHTML = `<div style="text-align:center;padding:48px 0">
+    <div style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px"></div>
+    <div style="font-size:14px;color:var(--text-muted)" id="briefingLoadLabel">Reviewing your client roster…</div>
+  </div>`;
+
+  const labels = ['Reviewing your client roster…','Checking who needs attention…','Analyzing portfolio movements…','Writing your briefing…'];
+  let li = 0;
+  const iv = setInterval(() => { if(li < labels.length-1) document.getElementById('briefingLoadLabel').textContent = labels[++li]; }, 1100);
+
+  if (!state.settings.apiKey) {
+    clearInterval(iv);
+    el.innerHTML = `<div class="settings-card"><div style="color:var(--amber);font-size:13.5px;line-height:1.7">⚠️ Add your Anthropic API key in Settings to enable AI briefings.</div></div>`;
+    return;
+  }
+
+  const now = new Date();
+  const clientSummaries = state.clients.map(c => {
+    const daysSince = c.lastContacted ? Math.floor((now - new Date(c.lastContacted)) / 86400000) : null;
+    const lastRpt   = c.lastReport   ? Math.floor((now - new Date(c.lastReport))    / 86400000) : null;
+    return `- ${c.name} (${c.risk}): ${(c.holdings||[]).map(h=>h.ticker).join(', ')||'no holdings'} | last contacted: ${daysSince===null?'never':`${daysSince}d ago`} | last report: ${lastRpt===null?'never':`${lastRpt}d ago`} | notes: ${c.notes||'none'}`;
+  }).join('\n');
+
+  const advisorName = state.settings.adviserName || sessionStorage.getItem('atlas_session') || 'Advisor';
+  const today = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  try {
+    const data = await callClaude([{role:'user',content:`You are a smart assistant for ${advisorName}, a financial advisor. Today is ${today}.
+
+Here is their client roster:
+${clientSummaries || 'No clients yet.'}
+
+Write a concise, actionable morning briefing. Be specific about names and situations. Structure it as:
+1. A warm one-sentence greeting
+2. Top 3 priority actions for today (most urgent first) — be specific about which client and why
+3. Who to reach out to today and a one-line reason for each
+4. One forward-looking thought for the week
+
+Return ONLY valid JSON, no markdown:
+{
+  "greeting": "...",
+  "priorities": [{"action":"...","reason":"...","urgent":true/false}],
+  "outreach": [{"client":"...","reason":"..."}],
+  "weekly_thought": "..."
+}`}], 1200);
+    const raw  = (data.content||[]).map(b=>b.text||'').join('').trim().replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+    const b    = JSON.parse(raw);
+
+    el.innerHTML = `
+      <div class="settings-card" style="background:var(--navy);border-color:var(--navy);margin-bottom:18px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--white);margin-bottom:4px">${today}</div>
+        <div style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.6">${b.greeting}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+        <div class="settings-card">
+          <div class="settings-title" style="font-size:14px">🎯 Today's Priorities</div>
+          ${(b.priorities||[]).map((p,i)=>`
+            <div style="display:flex;gap:11px;margin-bottom:14px;align-items:flex-start">
+              <div style="width:24px;height:24px;border-radius:50%;background:${p.urgent?'var(--red)':'var(--blue)'};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--navy)">${p.action}</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${p.reason}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="settings-card">
+          <div class="settings-title" style="font-size:14px">📞 Reach Out Today</div>
+          ${(b.outreach||[]).length===0
+            ? '<div style="font-size:13px;color:var(--text-muted)">All clients are up to date 🎉</div>'
+            : (b.outreach||[]).map(o=>`
+              <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0"></div>
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:var(--navy)">${o.client}</div>
+                  <div style="font-size:12px;color:var(--text-muted)">${o.reason}</div>
+                  <button class="btn btn-ghost btn-sm" style="margin-top:5px" onclick="openDraftForName('${o.client}')">✉ Draft</button>
+                </div>
+              </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:14px">🔭 Looking Ahead</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7">${b.weekly_thought}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right">Generated ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  } catch(err) {
+    clearInterval(iv);
+    el.innerHTML = `<div class="settings-card"><div style="color:var(--red);font-size:13px">Error generating briefing: ${err.message}</div></div>`;
+  }
+}
+
+function openDraftForName(name) {
+  const c = state.clients.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (c) openDraftModal(c.id);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PERFORMANCE DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
+async function refreshPerformance() {
+  const el = document.getElementById('performanceContent');
+  el.innerHTML = `<div style="text-align:center;padding:48px 0">
+    <div style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px"></div>
+    <div style="font-size:14px;color:var(--text-muted)">Fetching live prices for all holdings…</div>
+  </div>`;
+
+  // Collect all unique tickers
+  const allTickers = [...new Set(state.clients.flatMap(c => (c.holdings||[]).map(h => h.ticker)))];
+  if (allTickers.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📈</div><h3>No holdings found</h3><p>Add holdings to your clients to see performance here.</p></div>`;
+    return;
+  }
+
+  // Fetch all prices in parallel
+  const perfMap = {};
+  await Promise.all(allTickers.map(async ticker => {
+    try {
+      const change = await fetchWeeklyChange(ticker);
+      const price  = await fetchCurrentPrice(ticker);
+      perfMap[ticker] = { change, price };
+    } catch(e) { perfMap[ticker] = { change: 0, price: 0 }; }
+  }));
+
+  // Build per-client summaries
+  const clientPerf = state.clients.map(c => {
+    let total = 0, totalPrev = 0;
+    for (const h of (c.holdings||[])) {
+      const p = perfMap[h.ticker];
+      if (!p || !p.price) continue;
+      const val  = parseFloat(h.shares) * p.price;
+      const prev = val / (1 + p.change / 100);
+      total     += val;
+      totalPrev += prev;
+    }
+    const changePct = totalPrev > 0 ? (total - totalPrev) / totalPrev * 100 : 0;
+    return { ...c, totalValue: total, changePct };
+  }).sort((a,b) => b.changePct - a.changePct);
+
+  // Best/worst movers
+  const tickerChanges = allTickers.map(t => ({ ticker: t, ...perfMap[t] })).sort((a,b) => b.change - a.change);
+  const gainers = tickerChanges.slice(0,3);
+  const losers  = tickerChanges.slice(-3).reverse();
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px">
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:13px">🚀 Top Gainers This Week</div>
+        ${gainers.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <strong style="color:var(--navy)">${t.ticker}</strong>
+          <span style="color:var(--green);font-weight:700">+${t.change.toFixed(2)}%</span>
+        </div>`).join('')}
+      </div>
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:13px">📉 Biggest Decliners</div>
+        ${losers.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <strong style="color:var(--navy)">${t.ticker}</strong>
+          <span style="color:var(--red);font-weight:700">${t.change.toFixed(2)}%</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead><tr><th>Client</th><th>Risk</th><th>Portfolio Value</th><th>Week Change</th><th>Holdings</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${clientPerf.map(c => {
+            const color = c.changePct >= 0 ? 'var(--green)' : 'var(--red)';
+            const arrow = c.changePct >= 0 ? '▲' : '▼';
+            return `<tr>
+              <td class="client-name-cell" style="cursor:pointer" onclick="showClientDetail('${c.id}')">${c.name}</td>
+              <td><span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span></td>
+              <td style="font-weight:600">$${c.totalValue.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              <td style="color:${color};font-weight:700">${arrow} ${Math.abs(c.changePct).toFixed(2)}%</td>
+              <td style="font-size:12px">${(c.holdings||[]).map(h=>{
+                const p = perfMap[h.ticker];
+                const hc = p && p.change >= 0 ? 'var(--green)' : 'var(--red)';
+                return `<span style="color:${hc};font-weight:600;margin-right:6px">${h.ticker}</span>`;
+              }).join('')}</td>
+              <td><div class="action-btns">
+                <button class="btn btn-gold btn-sm" onclick="openDraftModal('${c.id}')">✉ Draft</button>
+                <button class="btn btn-primary btn-sm" onclick="openGenerateSingle('${c.id}')">📊</button>
+              </div></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:right">Live data via Yahoo Finance · Updated ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODEL PORTFOLIOS
+// ═══════════════════════════════════════════════════════════
+
+function renderModels() {
+  const el = document.getElementById('modelsContent');
+  if ((state.models||[]).length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🗂</div>
+      <h3>No model portfolios yet</h3>
+      <p>Create a template allocation and apply it to new clients instantly.</p>
+      <button class="btn btn-primary" onclick="openAddModel()">+ New Model</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px">
+    ${state.models.map(m => `
+      <div class="settings-card" style="position:relative">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--navy)">${m.name}</div>
+            <span class="badge badge-${m.risk.toLowerCase()}">${m.risk}</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-sm" onclick="openEditModel('${m.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteModel('${m.id}')">🗑</button>
+          </div>
+        </div>
+        ${m.desc ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.6">${m.desc}</div>` : ''}
+        <div style="margin-bottom:14px">
+          ${(m.holdings||[]).map(h=>`<div class="holding-tag"><strong>${h.ticker}</strong><span>${h.shares} sh · ${h.assetClass}</span></div>`).join('')}
+        </div>
+        <button class="btn btn-navy" style="width:100%" onclick="openApplyModel('${m.id}')">Apply to Client →</button>
+      </div>`).join('')}
+  </div>`;
+}
+
+function openAddModel() {
+  document.getElementById('modelModalTitle').textContent = 'New Model Portfolio';
+  document.getElementById('editModelId').value = '';
+  document.getElementById('modelName').value   = '';
+  document.getElementById('modelRisk').value   = 'Aggressive';
+  document.getElementById('modelDesc').value   = '';
+  document.getElementById('modelHoldingsList').innerHTML = '';
+  addModelHoldingRow();
+  openModal('modelModal');
+}
+
+function openEditModel(id) {
+  const m = (state.models||[]).find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('modelModalTitle').textContent = 'Edit Model';
+  document.getElementById('editModelId').value = id;
+  document.getElementById('modelName').value   = m.name;
+  document.getElementById('modelRisk').value   = m.risk;
+  document.getElementById('modelDesc').value   = m.desc || '';
+  document.getElementById('modelHoldingsList').innerHTML = '';
+  (m.holdings||[]).forEach(h => addModelHoldingRow(h.ticker, h.shares, h.assetClass));
+  if ((m.holdings||[]).length === 0) addModelHoldingRow();
+  openModal('modelModal');
+}
+
+function addModelHoldingRow(ticker='', shares='', assetClass='Equity') {
+  const div = document.createElement('div');
+  div.className = 'holding-row';
+  div.innerHTML = `
+    <input class="form-input h-ticker" placeholder="Ticker" value="${ticker}" style="text-transform:uppercase">
+    <input class="form-input h-shares" placeholder="Shares" value="${shares}" type="number" min="0">
+    <select class="form-select h-class">
+      ${['Equity','Equity ETF','Bond ETF','Preferred ETF','Commodity ETF','Dividend ETF'].map(
+        v => `<option value="${v}" ${assetClass===v?'selected':''}>${v}</option>`
+      ).join('')}
+    </select>
+    <button class="holding-remove" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('modelHoldingsList').appendChild(div);
+}
+
+function saveModel() {
+  const name    = document.getElementById('modelName').value.trim();
+  const risk    = document.getElementById('modelRisk').value;
+  const desc    = document.getElementById('modelDesc').value.trim();
+  const editId  = document.getElementById('editModelId').value;
+  if (!name) { showToast('Model name is required', 'error'); return; }
+
+  const holdings = [];
+  document.querySelectorAll('#modelHoldingsList .holding-row').forEach(row => {
+    const ticker = row.querySelector('.h-ticker').value.trim().toUpperCase();
+    const shares = row.querySelector('.h-shares').value.trim();
+    const ac     = row.querySelector('.h-class').value;
+    if (ticker && shares) holdings.push({ ticker, shares, assetClass: ac });
+  });
+
+  if (!state.models) state.models = [];
+  if (editId) {
+    const m = state.models.find(x => x.id === editId);
+    if (m) Object.assign(m, { name, risk, desc, holdings });
+  } else {
+    state.models.push({ id: 'M'+Date.now(), name, risk, desc, holdings });
+  }
+  save();
+  closeModal('modelModal');
+  renderModels();
+  showToast('Model saved', 'success');
+}
+
+function deleteModel(id) {
+  if (!confirm('Delete this model?')) return;
+  state.models = (state.models||[]).filter(m => m.id !== id);
+  save();
+  renderModels();
+  showToast('Model deleted', 'info');
+}
+
+let applyingModelId = null;
+
+function openApplyModel(modelId) {
+  applyingModelId = modelId;
+  const m  = (state.models||[]).find(x => x.id === modelId);
+  document.getElementById('applyModelTitle').textContent = `Apply "${m.name}" to Client`;
+  const sel = document.getElementById('applyModelClientSelect');
+  sel.innerHTML = state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('applyModelPreview').innerHTML = `
+    <div style="background:var(--off-white);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text-muted);line-height:1.7">
+      This will replace the selected client's holdings with: <strong>${(m.holdings||[]).map(h=>h.ticker).join(', ')}</strong>
+    </div>`;
+  openModal('applyModelModal');
+}
+
+function applyModelToClient() {
+  const clientId = document.getElementById('applyModelClientSelect').value;
+  const m = (state.models||[]).find(x => x.id === applyingModelId);
+  const c = state.clients.find(x => x.id === clientId);
+  if (!m || !c) return;
+  c.holdings = [...m.holdings];
+  save();
+  closeModal('applyModelModal');
+  showToast(`"${m.name}" applied to ${c.name}`, 'success');
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTREACH LOG
+// ═══════════════════════════════════════════════════════════
+
+function openLogEntry(clientId) {
+  document.getElementById('logClientId').value = clientId;
+  document.getElementById('logType').value     = 'Email';
+  document.getElementById('logNote').value     = '';
+  openModal('logEntryModal');
+}
+
+function saveLogEntry() {
+  const clientId = document.getElementById('logClientId').value;
+  const type     = document.getElementById('logType').value;
+  const note     = document.getElementById('logNote').value.trim();
+  if (!note) { showToast('Please add a note', 'error'); return; }
+
+  const c = state.clients.find(x => x.id === clientId);
+  if (!c) return;
+  if (!c.outreachLog) c.outreachLog = [];
+  c.outreachLog.push({ date: new Date().toISOString(), type, note });
+  c.lastContacted = new Date().toISOString();
+  save();
+  closeModal('logEntryModal');
+  showToast('Contact logged', 'success');
+  showClientDetail(clientId); // refresh detail view
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLIENT PORTAL LINK
+// ═══════════════════════════════════════════════════════════
+
+function generatePortalLink(clientId) {
+  const reportEntry = state.reportHistory.find(r => r.clientId === clientId);
+  if (!reportEntry || !state.reports[reportEntry.id]) {
+    showToast('Generate a report first to create a portal link', 'error');
+    return;
+  }
+  // Encode the latest report as a data URL the client can open
+  const html  = state.reports[reportEntry.id];
+  const blob  = new Blob([html], {type:'text/html'});
+  const url   = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  showToast('Client portal opened in new tab', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) {
+      // Don't close generation progress modal by clicking outside
+      if (o.id === 'generateProgressModal') return;
+      o.classList.remove('open');
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  t.innerHTML = `${icons[type]||''} ${msg}`;
+  t.className = `toast show ${type}`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+
+load();
+
+const sessionAdvisor = sessionStorage.getItem('atlas_session');
+if (sessionAdvisor) {
+  activateSession(sessionAdvisor);
+} else {
+  renderDashboard(); // pre-warm behind login
+}
+</script>
+</body>
+</html>
