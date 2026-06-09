@@ -966,12 +966,21 @@
       <div class="nav-item active" onclick="showPage('dashboard')">
         <span class="nav-icon">◼</span> Dashboard
       </div>
+      <div class="nav-item" onclick="showPage('briefing')">
+        <span class="nav-icon">☀️</span> Morning Briefing
+      </div>
       <div class="nav-item" onclick="showPage('clients')">
         <span class="nav-icon">👥</span> Clients
       </div>
       <div class="nav-label">Tools</div>
+      <div class="nav-item" onclick="showPage('performance')">
+        <span class="nav-icon">📈</span> Performance
+      </div>
       <div class="nav-item" onclick="showPage('reports')">
         <span class="nav-icon">📊</span> Reports
+      </div>
+      <div class="nav-item" onclick="showPage('models')">
+        <span class="nav-icon">🗂</span> Model Portfolios
       </div>
       <div class="nav-label">System</div>
       <div class="nav-item" onclick="showPage('settings')">
@@ -1025,7 +1034,48 @@
       </div>
     </div>
 
-    <!-- CLIENTS PAGE -->
+    <!-- MORNING BRIEFING PAGE -->
+    <div class="content page" id="page-briefing">
+      <div class="section-header">
+        <div class="section-title">☀️ Morning Briefing</div>
+        <button class="btn btn-gold" onclick="generateBriefing()">⚡ Generate Today's Briefing</button>
+      </div>
+      <div id="briefingContent">
+        <div class="empty-state">
+          <div class="empty-state-icon">☀️</div>
+          <h3>Start your day with Atlas</h3>
+          <p>Generate a personalized briefing to see who needs attention, what's urgent, and how to prioritize your day.</p>
+          <button class="btn btn-gold" onclick="generateBriefing()">⚡ Generate Briefing</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE PAGE -->
+    <div class="content page" id="page-performance">
+      <div class="section-header">
+        <div class="section-title">Portfolio Performance</div>
+        <button class="btn btn-primary" onclick="refreshPerformance()">↻ Refresh</button>
+      </div>
+      <div id="performanceContent">
+        <div class="empty-state">
+          <div class="empty-state-icon">📈</div>
+          <h3>Click Refresh to load live data</h3>
+          <p>Fetches current prices for all client holdings and shows who's up, who's down, and your biggest movers.</p>
+          <button class="btn btn-primary" onclick="refreshPerformance()">↻ Refresh Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL PORTFOLIOS PAGE -->
+    <div class="content page" id="page-models">
+      <div class="section-header">
+        <div class="section-title">Model Portfolios</div>
+        <button class="btn btn-primary" onclick="openAddModel()">+ New Model</button>
+      </div>
+      <div id="modelsContent"></div>
+    </div>
+
+
     <div class="content page" id="page-clients">
       <div class="section-header">
         <div class="section-title">All Clients</div>
@@ -1245,6 +1295,97 @@
   </div>
 </div>
 
+<!-- MODEL PORTFOLIO MODAL -->
+<div class="modal-overlay" id="modelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modelModalTitle">New Model Portfolio</div>
+      <button class="modal-close" onclick="closeModal('modelModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editModelId">
+      <div class="form-group">
+        <label class="form-label">Model Name</label>
+        <input class="form-input" id="modelName" placeholder="e.g. Aggressive Growth">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Risk Profile</label>
+        <select class="form-select" id="modelRisk">
+          <option>Aggressive</option>
+          <option>Moderate</option>
+          <option>Conservative</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="modelDesc" placeholder="Describe this model's strategy..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Holdings</label>
+        <div class="holdings-list" id="modelHoldingsList"></div>
+        <button class="add-holding-btn" onclick="addModelHoldingRow()">+ Add Holding</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modelModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModel()">Save Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPLY MODEL MODAL -->
+<div class="modal-overlay" id="applyModelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="applyModelTitle">Apply Model to Client</div>
+      <button class="modal-close" onclick="closeModal('applyModelModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">Select a client to apply this model's holdings to. This will replace their current holdings.</p>
+      <div class="form-group">
+        <label class="form-label">Select Client</label>
+        <select class="form-select" id="applyModelClientSelect"></select>
+      </div>
+      <div id="applyModelPreview" style="margin-top:14px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('applyModelModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="applyModelToClient()">Apply Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG CONTACT MODAL -->
+<div class="modal-overlay" id="logEntryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Log Contact</div>
+      <button class="modal-close" onclick="closeModal('logEntryModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="logClientId">
+      <div class="form-group">
+        <label class="form-label">Contact Type</label>
+        <select class="form-select" id="logType">
+          <option>Email</option>
+          <option>Phone Call</option>
+          <option>Meeting</option>
+          <option>Text</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="logNote" placeholder="What was discussed? Any follow-ups needed?"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('logEntryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLogEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
 <!-- DRAFT EMAIL MODAL -->
 <div class="modal-overlay" id="draftModal">
   <div class="modal modal-lg">
@@ -1296,7 +1437,8 @@
 let state = {
   clients: [],
   reportHistory: [],
-  reports: {},          // id → { html, date, clientId, clientName }
+  reports: {},
+  models: [],
   settings: {
     firmName:    'Atlas Wealth Management',
     adviserName: '',
@@ -1349,6 +1491,7 @@ function load() {
   }
   state.reportHistory = state.reportHistory || [];
   state.reports       = state.reports || {};
+  state.models        = state.models  || [];
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1425,17 +1568,18 @@ function showPage(page) {
   const el = document.getElementById('page-' + page);
   if (el) el.classList.add('active');
 
-  const titles  = { dashboard: 'Dashboard', clients: 'Clients', 'client-detail': 'Client Detail', reports: 'Reports', settings: 'Settings' };
+  const titles = { dashboard:'Dashboard', briefing:'Morning Briefing', clients:'Clients', 'client-detail':'Client Detail', performance:'Performance', reports:'Reports', models:'Model Portfolios', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || 'Atlas';
 
-  const navMap = { dashboard: 0, clients: 1, reports: 2, settings: 3 };
+  const navMap = { dashboard:0, briefing:1, clients:2, performance:3, reports:4, models:5, settings:6 };
   const navItems = document.querySelectorAll('.nav-item');
   if (navMap[page] !== undefined) navItems[navMap[page]].classList.add('active');
 
-  if (page === 'dashboard') renderDashboard();
-  if (page === 'clients')   renderClientsTable();
-  if (page === 'reports')   renderReportHistory();
-  if (page === 'settings')  loadSettingsForm();
+  if (page === 'dashboard')   renderDashboard();
+  if (page === 'clients')     renderClientsTable();
+  if (page === 'reports')     renderReportHistory();
+  if (page === 'settings')    loadSettingsForm();
+  if (page === 'models')      renderModels();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1619,6 +1763,7 @@ function showClientDetail(id) {
       </div>
       <div style="display:flex;gap:9px">
         <button class="btn btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="openEditClient('${c.id}')">✏️ Edit</button>
+        <button class="btn btn-ghost" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="generatePortalLink('${c.id}')">🔗 Portal</button>
         <button class="btn btn-gold" onclick="openDraftModal('${c.id}')">✉ Draft Email</button>
         <button class="btn btn-primary" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25)" onclick="openGenerateSingle('${c.id}')">📊 Report</button>
       </div>
@@ -1666,10 +1811,27 @@ function showClientDetail(id) {
       </div>
     </div>
 
-    <div class="card">
-      <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--navy)">
-        Report History
+    <div class="card" style="margin-bottom:20px">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--navy)">Outreach Log</div>
+        <button class="btn btn-ghost btn-sm" onclick="openLogEntry('${c.id}')">+ Log Contact</button>
       </div>
+      <div id="outreachLog-${c.id}">
+        ${(c.outreachLog||[]).length === 0
+          ? '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">No contact logged yet</div>'
+          : (c.outreachLog||[]).slice().reverse().map(e => `
+            <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start">
+              <div style="flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px"></div>
+              <div style="flex:1">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:3px">${new Date(e.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} · ${e.type}</div>
+                <div style="font-size:13.5px;color:var(--text);line-height:1.6">${e.note}</div>
+              </div>
+            </div>`).join('')
+        }
+      </div>
+    </div>
+
+
       ${reportsHtml}
     </div>
   `;
@@ -2556,6 +2718,402 @@ function saveSettings() {
 
   save();
   showToast('Settings saved', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MORNING BRIEFING
+// ═══════════════════════════════════════════════════════════
+
+async function generateBriefing() {
+  const el = document.getElementById('briefingContent');
+  el.innerHTML = `<div style="text-align:center;padding:48px 0">
+    <div style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px"></div>
+    <div style="font-size:14px;color:var(--text-muted)" id="briefingLoadLabel">Reviewing your client roster…</div>
+  </div>`;
+
+  const labels = ['Reviewing your client roster…','Checking who needs attention…','Analyzing portfolio movements…','Writing your briefing…'];
+  let li = 0;
+  const iv = setInterval(() => { if(li < labels.length-1) document.getElementById('briefingLoadLabel').textContent = labels[++li]; }, 1100);
+
+  if (!state.settings.apiKey) {
+    clearInterval(iv);
+    el.innerHTML = `<div class="settings-card"><div style="color:var(--amber);font-size:13.5px;line-height:1.7">⚠️ Add your Anthropic API key in Settings to enable AI briefings.</div></div>`;
+    return;
+  }
+
+  const now = new Date();
+  const clientSummaries = state.clients.map(c => {
+    const daysSince = c.lastContacted ? Math.floor((now - new Date(c.lastContacted)) / 86400000) : null;
+    const lastRpt   = c.lastReport   ? Math.floor((now - new Date(c.lastReport))    / 86400000) : null;
+    return `- ${c.name} (${c.risk}): ${(c.holdings||[]).map(h=>h.ticker).join(', ')||'no holdings'} | last contacted: ${daysSince===null?'never':`${daysSince}d ago`} | last report: ${lastRpt===null?'never':`${lastRpt}d ago`} | notes: ${c.notes||'none'}`;
+  }).join('\n');
+
+  const advisorName = state.settings.adviserName || sessionStorage.getItem('atlas_session') || 'Advisor';
+  const today = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1200,
+        messages:[{role:'user',content:`You are a smart assistant for ${advisorName}, a financial advisor. Today is ${today}.
+
+Here is their client roster:
+${clientSummaries || 'No clients yet.'}
+
+Write a concise, actionable morning briefing. Be specific about names and situations. Structure it as:
+1. A warm one-sentence greeting
+2. Top 3 priority actions for today (most urgent first) — be specific about which client and why
+3. Who to reach out to today and a one-line reason for each
+4. One forward-looking thought for the week
+
+Return ONLY valid JSON, no markdown:
+{
+  "greeting": "...",
+  "priorities": [{"action":"...","reason":"...","urgent":true/false}],
+  "outreach": [{"client":"...","reason":"..."}],
+  "weekly_thought": "..."
+}`}]
+      })
+    });
+    clearInterval(iv);
+    const data = await res.json();
+    const raw  = (data.content||[]).map(b=>b.text||'').join('').trim().replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+    const b    = JSON.parse(raw);
+
+    el.innerHTML = `
+      <div class="settings-card" style="background:var(--navy);border-color:var(--navy);margin-bottom:18px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--white);margin-bottom:4px">${today}</div>
+        <div style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.6">${b.greeting}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+        <div class="settings-card">
+          <div class="settings-title" style="font-size:14px">🎯 Today's Priorities</div>
+          ${(b.priorities||[]).map((p,i)=>`
+            <div style="display:flex;gap:11px;margin-bottom:14px;align-items:flex-start">
+              <div style="width:24px;height:24px;border-radius:50%;background:${p.urgent?'var(--red)':'var(--blue)'};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--navy)">${p.action}</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${p.reason}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="settings-card">
+          <div class="settings-title" style="font-size:14px">📞 Reach Out Today</div>
+          ${(b.outreach||[]).length===0
+            ? '<div style="font-size:13px;color:var(--text-muted)">All clients are up to date 🎉</div>'
+            : (b.outreach||[]).map(o=>`
+              <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0"></div>
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:var(--navy)">${o.client}</div>
+                  <div style="font-size:12px;color:var(--text-muted)">${o.reason}</div>
+                  <button class="btn btn-ghost btn-sm" style="margin-top:5px" onclick="openDraftForName('${o.client}')">✉ Draft</button>
+                </div>
+              </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:14px">🔭 Looking Ahead</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7">${b.weekly_thought}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right">Generated ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  } catch(err) {
+    clearInterval(iv);
+    el.innerHTML = `<div class="settings-card"><div style="color:var(--red);font-size:13px">Error generating briefing: ${err.message}</div></div>`;
+  }
+}
+
+function openDraftForName(name) {
+  const c = state.clients.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (c) openDraftModal(c.id);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PERFORMANCE DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
+async function refreshPerformance() {
+  const el = document.getElementById('performanceContent');
+  el.innerHTML = `<div style="text-align:center;padding:48px 0">
+    <div style="display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px"></div>
+    <div style="font-size:14px;color:var(--text-muted)">Fetching live prices for all holdings…</div>
+  </div>`;
+
+  // Collect all unique tickers
+  const allTickers = [...new Set(state.clients.flatMap(c => (c.holdings||[]).map(h => h.ticker)))];
+  if (allTickers.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📈</div><h3>No holdings found</h3><p>Add holdings to your clients to see performance here.</p></div>`;
+    return;
+  }
+
+  // Fetch all prices in parallel
+  const perfMap = {};
+  await Promise.all(allTickers.map(async ticker => {
+    try {
+      const change = await fetchWeeklyChange(ticker);
+      const price  = await fetchCurrentPrice(ticker);
+      perfMap[ticker] = { change, price };
+    } catch(e) { perfMap[ticker] = { change: 0, price: 0 }; }
+  }));
+
+  // Build per-client summaries
+  const clientPerf = state.clients.map(c => {
+    let total = 0, totalPrev = 0;
+    for (const h of (c.holdings||[])) {
+      const p = perfMap[h.ticker];
+      if (!p || !p.price) continue;
+      const val  = parseFloat(h.shares) * p.price;
+      const prev = val / (1 + p.change / 100);
+      total     += val;
+      totalPrev += prev;
+    }
+    const changePct = totalPrev > 0 ? (total - totalPrev) / totalPrev * 100 : 0;
+    return { ...c, totalValue: total, changePct };
+  }).sort((a,b) => b.changePct - a.changePct);
+
+  // Best/worst movers
+  const tickerChanges = allTickers.map(t => ({ ticker: t, ...perfMap[t] })).sort((a,b) => b.change - a.change);
+  const gainers = tickerChanges.slice(0,3);
+  const losers  = tickerChanges.slice(-3).reverse();
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px">
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:13px">🚀 Top Gainers This Week</div>
+        ${gainers.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <strong style="color:var(--navy)">${t.ticker}</strong>
+          <span style="color:var(--green);font-weight:700">+${t.change.toFixed(2)}%</span>
+        </div>`).join('')}
+      </div>
+      <div class="settings-card">
+        <div class="settings-title" style="font-size:13px">📉 Biggest Decliners</div>
+        ${losers.map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <strong style="color:var(--navy)">${t.ticker}</strong>
+          <span style="color:var(--red);font-weight:700">${t.change.toFixed(2)}%</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead><tr><th>Client</th><th>Risk</th><th>Portfolio Value</th><th>Week Change</th><th>Holdings</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${clientPerf.map(c => {
+            const color = c.changePct >= 0 ? 'var(--green)' : 'var(--red)';
+            const arrow = c.changePct >= 0 ? '▲' : '▼';
+            return `<tr>
+              <td class="client-name-cell" style="cursor:pointer" onclick="showClientDetail('${c.id}')">${c.name}</td>
+              <td><span class="badge badge-${c.risk.toLowerCase()}">${c.risk}</span></td>
+              <td style="font-weight:600">$${c.totalValue.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              <td style="color:${color};font-weight:700">${arrow} ${Math.abs(c.changePct).toFixed(2)}%</td>
+              <td style="font-size:12px">${(c.holdings||[]).map(h=>{
+                const p = perfMap[h.ticker];
+                const hc = p && p.change >= 0 ? 'var(--green)' : 'var(--red)';
+                return `<span style="color:${hc};font-weight:600;margin-right:6px">${h.ticker}</span>`;
+              }).join('')}</td>
+              <td><div class="action-btns">
+                <button class="btn btn-gold btn-sm" onclick="openDraftModal('${c.id}')">✉ Draft</button>
+                <button class="btn btn-primary btn-sm" onclick="openGenerateSingle('${c.id}')">📊</button>
+              </div></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:right">Live data via Yahoo Finance · Updated ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODEL PORTFOLIOS
+// ═══════════════════════════════════════════════════════════
+
+function renderModels() {
+  const el = document.getElementById('modelsContent');
+  if ((state.models||[]).length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🗂</div>
+      <h3>No model portfolios yet</h3>
+      <p>Create a template allocation and apply it to new clients instantly.</p>
+      <button class="btn btn-primary" onclick="openAddModel()">+ New Model</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px">
+    ${state.models.map(m => `
+      <div class="settings-card" style="position:relative">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--navy)">${m.name}</div>
+            <span class="badge badge-${m.risk.toLowerCase()}">${m.risk}</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-sm" onclick="openEditModel('${m.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteModel('${m.id}')">🗑</button>
+          </div>
+        </div>
+        ${m.desc ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.6">${m.desc}</div>` : ''}
+        <div style="margin-bottom:14px">
+          ${(m.holdings||[]).map(h=>`<div class="holding-tag"><strong>${h.ticker}</strong><span>${h.shares} sh · ${h.assetClass}</span></div>`).join('')}
+        </div>
+        <button class="btn btn-navy" style="width:100%" onclick="openApplyModel('${m.id}')">Apply to Client →</button>
+      </div>`).join('')}
+  </div>`;
+}
+
+function openAddModel() {
+  document.getElementById('modelModalTitle').textContent = 'New Model Portfolio';
+  document.getElementById('editModelId').value = '';
+  document.getElementById('modelName').value   = '';
+  document.getElementById('modelRisk').value   = 'Aggressive';
+  document.getElementById('modelDesc').value   = '';
+  document.getElementById('modelHoldingsList').innerHTML = '';
+  addModelHoldingRow();
+  openModal('modelModal');
+}
+
+function openEditModel(id) {
+  const m = (state.models||[]).find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('modelModalTitle').textContent = 'Edit Model';
+  document.getElementById('editModelId').value = id;
+  document.getElementById('modelName').value   = m.name;
+  document.getElementById('modelRisk').value   = m.risk;
+  document.getElementById('modelDesc').value   = m.desc || '';
+  document.getElementById('modelHoldingsList').innerHTML = '';
+  (m.holdings||[]).forEach(h => addModelHoldingRow(h.ticker, h.shares, h.assetClass));
+  if ((m.holdings||[]).length === 0) addModelHoldingRow();
+  openModal('modelModal');
+}
+
+function addModelHoldingRow(ticker='', shares='', assetClass='Equity') {
+  const div = document.createElement('div');
+  div.className = 'holding-row';
+  div.innerHTML = `
+    <input class="form-input h-ticker" placeholder="Ticker" value="${ticker}" style="text-transform:uppercase">
+    <input class="form-input h-shares" placeholder="Shares" value="${shares}" type="number" min="0">
+    <select class="form-select h-class">
+      ${['Equity','Equity ETF','Bond ETF','Preferred ETF','Commodity ETF','Dividend ETF'].map(
+        v => `<option value="${v}" ${assetClass===v?'selected':''}>${v}</option>`
+      ).join('')}
+    </select>
+    <button class="holding-remove" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('modelHoldingsList').appendChild(div);
+}
+
+function saveModel() {
+  const name    = document.getElementById('modelName').value.trim();
+  const risk    = document.getElementById('modelRisk').value;
+  const desc    = document.getElementById('modelDesc').value.trim();
+  const editId  = document.getElementById('editModelId').value;
+  if (!name) { showToast('Model name is required', 'error'); return; }
+
+  const holdings = [];
+  document.querySelectorAll('#modelHoldingsList .holding-row').forEach(row => {
+    const ticker = row.querySelector('.h-ticker').value.trim().toUpperCase();
+    const shares = row.querySelector('.h-shares').value.trim();
+    const ac     = row.querySelector('.h-class').value;
+    if (ticker && shares) holdings.push({ ticker, shares, assetClass: ac });
+  });
+
+  if (!state.models) state.models = [];
+  if (editId) {
+    const m = state.models.find(x => x.id === editId);
+    if (m) Object.assign(m, { name, risk, desc, holdings });
+  } else {
+    state.models.push({ id: 'M'+Date.now(), name, risk, desc, holdings });
+  }
+  save();
+  closeModal('modelModal');
+  renderModels();
+  showToast('Model saved', 'success');
+}
+
+function deleteModel(id) {
+  if (!confirm('Delete this model?')) return;
+  state.models = (state.models||[]).filter(m => m.id !== id);
+  save();
+  renderModels();
+  showToast('Model deleted', 'info');
+}
+
+let applyingModelId = null;
+
+function openApplyModel(modelId) {
+  applyingModelId = modelId;
+  const m  = (state.models||[]).find(x => x.id === modelId);
+  document.getElementById('applyModelTitle').textContent = `Apply "${m.name}" to Client`;
+  const sel = document.getElementById('applyModelClientSelect');
+  sel.innerHTML = state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('applyModelPreview').innerHTML = `
+    <div style="background:var(--off-white);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text-muted);line-height:1.7">
+      This will replace the selected client's holdings with: <strong>${(m.holdings||[]).map(h=>h.ticker).join(', ')}</strong>
+    </div>`;
+  openModal('applyModelModal');
+}
+
+function applyModelToClient() {
+  const clientId = document.getElementById('applyModelClientSelect').value;
+  const m = (state.models||[]).find(x => x.id === applyingModelId);
+  const c = state.clients.find(x => x.id === clientId);
+  if (!m || !c) return;
+  c.holdings = [...m.holdings];
+  save();
+  closeModal('applyModelModal');
+  showToast(`"${m.name}" applied to ${c.name}`, 'success');
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTREACH LOG
+// ═══════════════════════════════════════════════════════════
+
+function openLogEntry(clientId) {
+  document.getElementById('logClientId').value = clientId;
+  document.getElementById('logType').value     = 'Email';
+  document.getElementById('logNote').value     = '';
+  openModal('logEntryModal');
+}
+
+function saveLogEntry() {
+  const clientId = document.getElementById('logClientId').value;
+  const type     = document.getElementById('logType').value;
+  const note     = document.getElementById('logNote').value.trim();
+  if (!note) { showToast('Please add a note', 'error'); return; }
+
+  const c = state.clients.find(x => x.id === clientId);
+  if (!c) return;
+  if (!c.outreachLog) c.outreachLog = [];
+  c.outreachLog.push({ date: new Date().toISOString(), type, note });
+  c.lastContacted = new Date().toISOString();
+  save();
+  closeModal('logEntryModal');
+  showToast('Contact logged', 'success');
+  showClientDetail(clientId); // refresh detail view
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLIENT PORTAL LINK
+// ═══════════════════════════════════════════════════════════
+
+function generatePortalLink(clientId) {
+  const reportEntry = state.reportHistory.find(r => r.clientId === clientId);
+  if (!reportEntry || !state.reports[reportEntry.id]) {
+    showToast('Generate a report first to create a portal link', 'error');
+    return;
+  }
+  // Encode the latest report as a data URL the client can open
+  const html  = state.reports[reportEntry.id];
+  const blob  = new Blob([html], {type:'text/html'});
+  const url   = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  showToast('Client portal opened in new tab', 'success');
 }
 
 // ═══════════════════════════════════════════════════════════
